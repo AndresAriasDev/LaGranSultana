@@ -1,1 +1,49 @@
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/inter/Inter-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/inter/Inter-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/inter/Inter-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/inter/Inter-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+
+@theme {
+  --color-amarillo-pr: #F19123;
+  --color-verde-pr: #A2C783;
+    --color-azul-pr: #8398C7;
+    --color-rojo-pr: #FD7171;
+  --color-tx-azul: #576186;
+  --color-tx-negro: #666666;
+  --color-tx-cafe: #695A55;
+  
+  --font-sans: "Inter", sans-serif;
+  --font-serif: "Playfair Display", serif;
+
+}
+
 @import "tailwindcss"

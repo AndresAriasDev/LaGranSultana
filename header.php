@@ -7,8 +7,8 @@
     <?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
-<header>
+<header class="p-4 bg-red-500 text-white">
     <nav>
-        <h1>Hola, ¿cómo estás?</h1>
+        <h1 class="font-sans text-amarillo-pr">Hola, ¿cómo estás?</h1>
     </nav>
 </header>
