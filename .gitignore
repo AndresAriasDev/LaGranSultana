@@ -1,0 +1,20 @@
+# WordPress core
+/wp-admin/
+/wp-includes/
+/wp-content/uploads/
+/wp-content/plugins/
+
+# Node
+node_modules/
+
+# Build
+/dist/
+/build/
+
+# Env
+.env
+
+# OS / editors
+.DS_Store
+Thumbs.db
+*.log
