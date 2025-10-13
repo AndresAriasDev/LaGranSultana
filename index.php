@@ -5,8 +5,8 @@
 get_header();
 ?>
 
-<main class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-center">¡Bienvenido a Gran Sultana!</h1>
+<main class="container mx-auto px-4 py-8 bg-amber-800">
+    <h1 class="text-3xl font-bold text-center bg-red-500">¡Bienvenido a Gran Sultana!</h1>
     <p class="text-center text-gray-500 mt-2">Este es tu tema base personalizado.</p>
 </main>
 

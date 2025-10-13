@@ -10,7 +10,10 @@ function gran_sultana_setup() {
 add_action('after_setup_theme', 'gran_sultana_setup');
 
 function gran_sultana_enqueue_scripts() {
-    wp_enqueue_style('gran-sultana-style', get_stylesheet_uri());
+    wp_enqueue_style(
+        'gran-sultana-style', 
+        get_template_directory_uri() . '/assets/css/style.css'
+    );
 }
 add_action('wp_enqueue_scripts', 'gran_sultana_enqueue_scripts');
 
