@@ -19,4 +19,12 @@ add_action('wp_enqueue_scripts', 'gran_sultana_enqueue_scripts');
 
 /***********************************************************/
 
+function gran_sultana_register_menus() {
+    register_nav_menus(array(
+        'primary' => __('Menú Principal', 'lagransultana'),
+    ));
+}
+add_action('after_setup_theme', 'gran_sultana_register_menus');
+
+
 require_once get_template_directory() . '/inc/roles.php';

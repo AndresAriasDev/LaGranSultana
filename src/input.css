@@ -36,10 +36,16 @@
   --color-amarillo-pr: #F19123;
   --color-verde-pr: #A2C783;
     --color-azul-pr: #8398C7;
+    
+    --color-blanco-pr: #ffffff;
     --color-rojo-pr: #FD7171;
   --color-tx-azul: #576186;
   --color-tx-negro: #666666;
   --color-tx-cafe: #695A55;
+  --color-tx-blanco: #ffffff;
+
+  --color-blanco-bajo: #F9F9F9;
+  --color-borde: #efefef;
   
   --font-sans: "Inter", sans-serif;
   --font-serif: "Playfair Display", serif;
