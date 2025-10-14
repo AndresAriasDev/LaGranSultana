@@ -20,6 +20,9 @@ add_action('wp_footer', function () {
             <div id="gs-auth-modal-content" class="p-5">
                 <?php get_template_part('template-parts/auth/register-form'); ?>
             </div>
+            <div id="gs-auth-login-content" class="hidden p-5">
+                 <?php get_template_part('template-parts/auth/login-form'); ?>
+            </div>
         </div>
     </div>
     <?php

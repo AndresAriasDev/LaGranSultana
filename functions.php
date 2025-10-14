@@ -37,6 +37,8 @@ require_once get_template_directory() . '/inc/cpt/cpt-fotos.php';       // CPT F
 require_once get_template_directory() . '/inc/roles/rol-modelo.php';    // Lógica específica del rol Modelo
 require_once get_template_directory() . '/inc/auth/modal.php';
 require_once get_template_directory() . '/inc/shortcodes/register.php';
+require_once get_template_directory() . '/inc/shortcodes/login.php';
+require_once get_template_directory() . '/inc/auth/login-handler.php';
 require_once get_template_directory() . '/inc/auth/register-handler.php';
 add_action('wp_enqueue_scripts', function () {
     wp_enqueue_script(

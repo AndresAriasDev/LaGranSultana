@@ -73,3 +73,50 @@
     }
   });
 })();
+
+/**************/
+
+(function(){
+  const form = document.getElementById('gs-login-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+
+    const feedback = document.getElementById('gs-login-feedback');
+    if (feedback) {
+      feedback.classList.remove('hidden');
+      feedback.className = 'rounded-md border px-3 py-2 text-sm bg-[var(--color-blanco-bajo)] text-[var(--color-tx-azul)]';
+      feedback.innerHTML = 'Verificando credenciales...';
+    }
+
+    const formData = new FormData(form);
+    formData.append('action', 'gs_handle_user_login'); // Hook definido en PHP
+
+    try {
+      const response = await fetch(gsAuth.ajaxUrl, {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        if (feedback) {
+          feedback.className = 'rounded-md border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-800';
+          feedback.innerHTML = result.data.message;
+        }
+        setTimeout(() => window.location.href = result.data.redirect, 800);
+      } else {
+        if (feedback) {
+          feedback.className = 'rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800';
+          feedback.innerHTML = result.data.message || 'Correo o contraseña incorrectos.';
+        }
+      }
+    } catch (error) {
+      if (feedback) {
+        feedback.className = 'rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800';
+        feedback.innerHTML = 'Error de conexión. Intenta nuevamente.';
+      }
+    }
+  });
+})();

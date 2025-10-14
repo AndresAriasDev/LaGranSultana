@@ -422,6 +422,9 @@
   .bg-\[var\(--color-amarillo-pr\)\] {
     background-color: var(--color-amarillo-pr);
   }
+  .bg-\[var\(--color-azul-pr\)\] {
+    background-color: var(--color-azul-pr);
+  }
   .bg-\[var\(--color-blanco-bajo\)\] {
     background-color: var(--color-blanco-bajo);
   }
@@ -533,6 +536,9 @@
   }
   .text-\[var\(--color-amarillo-pr\)\] {
     color: var(--color-amarillo-pr);
+  }
+  .text-\[var\(--color-azul-pr\)\] {
+    color: var(--color-azul-pr);
   }
   .text-\[var\(--color-tx-azul\)\] {
     color: var(--color-tx-azul);
