@@ -58,8 +58,7 @@ function gs_handle_user_registration() {
 
     // Responder éxito
     wp_send_json_success([
-        'message' => 'Cuenta creada correctamente.',
-        'redirect' => home_url('/mi-cuenta')
+        'message' => 'Cuenta creada correctamente.'
     ]);
 }
 add_action('wp_ajax_nopriv_gs_handle_user_registration', 'gs_handle_user_registration');
