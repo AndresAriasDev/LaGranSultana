@@ -36,6 +36,21 @@ require_once get_template_directory() . '/inc/cpt/cpt-modelos.php';     // CPT M
 require_once get_template_directory() . '/inc/cpt/cpt-fotos.php';       // CPT Fotos
 require_once get_template_directory() . '/inc/roles/rol-modelo.php';    // Lógica específica del rol Modelo
 require_once get_template_directory() . '/inc/auth/modal.php';
+require_once get_template_directory() . '/inc/shortcodes/register.php';
+require_once get_template_directory() . '/inc/auth/register-handler.php';
+add_action('wp_enqueue_scripts', function () {
+    wp_enqueue_script(
+        'gran-sultana-auth',
+        get_template_directory_uri() . '/assets/js/auth.js',
+        [],
+        filemtime(get_template_directory() . '/assets/js/auth.js'),
+        true
+    );
+
+    wp_localize_script('gran-sultana-auth', 'gsAuth', [
+        'ajaxUrl' => admin_url('admin-ajax.php')
+    ]);
+});
 
 /**
  * Permisos especiales para Administrador (gestión de Fotos)
