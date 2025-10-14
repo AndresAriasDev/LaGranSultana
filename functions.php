@@ -28,3 +28,9 @@ add_action('after_setup_theme', 'gran_sultana_register_menus');
 
 
 require_once get_template_directory() . '/inc/roles.php';
+
+
+/**********REGISTRO DE CPT PERSONALIZADOS ************/
+require_once get_template_directory() . '/inc/cpt/cpt-modelos.php';
+require_once get_template_directory() . '/inc/cpt/cpt-fotos.php';
+require_once get_template_directory() . '/inc/roles/rol-modelo.php';
