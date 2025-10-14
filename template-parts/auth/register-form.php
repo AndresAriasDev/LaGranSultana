@@ -35,9 +35,11 @@
     Crear cuenta
   </button>
 
-  <p class="text-xs text-center text-[var(--color-tx-azul)]">
-    ¿Ya tienes cuenta? <a href="/login" class="underline">Inicia sesión</a>
-  </p>
+<p class="text-xs text-center text-[var(--color-tx-azul)]">
+  ¿Ya tienes cuenta?
+  <a href="#" data-switch-login class="underline hover:text-[var(--color-azul-pr)]">Inicia sesión</a>
+</p>
+
 
   <div id="gs-reg-feedback" class="hidden rounded-md border px-3 py-2 text-sm"></div>
 </form>

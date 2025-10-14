@@ -28,9 +28,11 @@
     Iniciar sesión
   </button>
 
-  <p class="text-xs text-center text-[var(--color-tx-azul)]">
-    ¿Aún no tienes cuenta? <a href="/registro" class="underline">Regístrate aquí</a>
-  </p>
+<p class="text-xs text-center text-[var(--color-tx-azul)]">
+  ¿Aún no tienes cuenta?
+  <a href="#" data-switch-register class="underline hover:text-[var(--color-amarillo-pr)]">Regístrate aquí</a>
+</p>
+
 
   <div id="gs-login-feedback" class="hidden rounded-md border px-3 py-2 text-sm"></div>
 </form>
