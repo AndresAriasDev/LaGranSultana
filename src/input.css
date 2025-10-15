@@ -38,7 +38,7 @@
 }
 
 #gs-menu-toggle.active .hamb-line:nth-child(2) {
-  transform: translateX(12px);
+  transform: translateX(8px);
 }
 /*FIN ESTILOS PARA EL BOTON HAMBURGUESA MOVIL*/
 

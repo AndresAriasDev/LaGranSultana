@@ -66,14 +66,14 @@
       <?php endif; ?>
     </div>
 
-    <!-- Botón Hamburguesa (solo mobile) -->
-    <button id="gs-menu-toggle"
-      class="flex md:hidden flex-col justify-between w-[36px] h-[26px] focus:outline-none transition-all"
-      aria-label="Abrir menú">
-      <span class="hamb-line"></span>
-      <span class="hamb-line"></span>
-      <span class="hamb-line"></span>
-    </button>
+<!-- Botón Hamburguesa (solo mobile) -->
+<button id="gs-menu-toggle"
+  class="flex md:hidden flex-col justify-between w-[36px] h-[26px] focus:outline-none transition-all z-1000 relative"
+  aria-label="Abrir menú">
+  <span class="hamb-line"></span>
+  <span class="hamb-line"></span>
+  <span class="hamb-line"></span>
+</button>
 
   </div>
 
@@ -104,6 +104,7 @@
     </div>
   </nav>
 </header>
+<?php get_template_part('template-parts/header/mobile-menu'); ?>
 
 
 

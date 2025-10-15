@@ -28,6 +28,19 @@ function gran_sultana_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts', 'gran_sultana_enqueue_scripts');
 
+
+/**
+ * Ocultar la barra de administración de WordPress en el frontend
+ * para todos los usuarios excepto administradores.
+ */
+add_action('after_setup_theme', function() {
+    if (!current_user_can('administrator') && !is_admin()) {
+        show_admin_bar(false);
+    }
+});
+
+
+
 /**
  * Incluir archivos modulares
  */
@@ -83,3 +96,10 @@ add_action('wp_enqueue_scripts', function () {
         true
     );
 });
+wp_enqueue_script(
+  'gs-mobile-menu',
+  get_template_directory_uri() . '/assets/js/mobile-menu.js',
+  array(),
+  '1.0.0',
+  true // ⬅️ esto es lo importante
+);
