@@ -8,8 +8,7 @@
 </head>
 <body <?php body_class(); ?>>
 
-<header class="border-b" style="border-color: var(--color-borde); background-color: var(--color-blanco-pr);">
-  <!-- Primera fila -->
+<header class="border-b min-h-[64px]" style="border-color: var(--color-borde); background-color: var(--color-blanco-pr);">
   <div class="w-[94%] mx-auto flex items-center justify-between py-4 px-2">
 
     <!-- Logo -->
@@ -47,19 +46,19 @@
     <div class="hidden md:flex items-center space-x-5">
       <?php if ( ! is_user_logged_in() ) : ?>
         <button data-open-login
-          class="font-medium text-[16px] transition"
+          class="flex items-center justify-center font-medium px-5 h-[50px] text-[16px] transition"
           style="color: var(--color-tx-cafe);">
           Entrar
         </button>
 
         <button data-open-register
-          class="font-medium px-5 py-2.5 rounded-md transition hover:opacity-90"
+          class="flex items-center justify-center font-medium px-5 h-[50px] rounded-md transition hover:opacity-90"
           style="background-color: var(--color-amarillo-pr); color: var(--color-tx-blanco);">
           Registrarse
         </button>
       <?php else : ?>
         <a href="<?php echo esc_url( home_url('/mi-cuenta') ); ?>"
-          class="font-medium px-5 py-2.5 rounded-md transition hover:opacity-90"
+          class="flex items-center justify-center font-medium px-6 h-[50px] rounded-md transition hover:opacity-90"
           style="background-color: var(--color-azul-pr); color: var(--color-tx-blanco);">
           Mi cuenta
         </a>
@@ -68,12 +67,13 @@
 
 <!-- Botón Hamburguesa (solo mobile) -->
 <button id="gs-menu-toggle"
-  class="flex md:hidden flex-col justify-between w-[36px] h-[26px] focus:outline-none transition-all z-1000 relative"
+  class="flex md:hidden flex-col justify-between w-[34px] h-[26px] focus:outline-none transition-all relative z-50"
   aria-label="Abrir menú">
   <span class="hamb-line"></span>
   <span class="hamb-line"></span>
   <span class="hamb-line"></span>
 </button>
+
 
   </div>
 

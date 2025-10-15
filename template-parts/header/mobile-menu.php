@@ -7,14 +7,25 @@
     style="background-color: var(--color-blanco-pr);">
 
     <!-- Sección superior -->
-    <div class="flex flex-col flex-1 px-6 pt-6 overflow-y-auto">
+    <div class="flex flex-col flex-1 px-4 pt-6 overflow-y-auto">
 
-      <!-- Encabezado -->
-      <div class="flex items-center justify-between mb-5">
-        <span class="text-xl font-semibold tracking-wide" style="color: var(--color-tx-cafe);">
-          Menú
-        </span>
-      </div>
+<!-- Encabezado -->
+<div class="flex items-center min-h-[44px] justify-between mb-5 px-0 pt-0">
+  <?php if ( is_user_logged_in() ) : ?>
+    <a href="<?php echo esc_url( home_url('/mi-cuenta') ); ?>"
+       class="flex items-center space-x-2 px-4 h-[40px] rounded-md font-medium transition hover:opacity-90"
+       style="background-color: var(--color-azul-pr); color: var(--color-tx-blanco);">
+      <img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/2025/10/usuario-blanco.png' ); ?>"
+           alt="Mi cuenta"
+           class="h-5 w-5 opacity-90">
+      <span>Mi cuenta</span>
+    </a>
+  <?php else : ?>
+    <span></span>
+  <?php endif; ?>
+  <span></span>
+</div>
+
 
       <!-- Barra de búsqueda -->
       <form action="<?php echo home_url('/'); ?>" method="get" class="relative mb-8">
@@ -60,12 +71,6 @@
             Registrarse
           </button>
         </div>
-      <?php else : ?>
-        <a href="<?php echo esc_url( home_url('/mi-cuenta') ); ?>"
-          class="block text-center mt-6 py-3 rounded-md font-medium transition hover:opacity-90"
-          style="background-color: var(--color-azul-pr); color: var(--color-tx-blanco);">
-          Mi cuenta
-        </a>
       <?php endif; ?>
     </div>
   </div>
