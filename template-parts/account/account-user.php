@@ -67,7 +67,7 @@ $has_bonus    = get_user_meta($current_user->ID, 'gs_profile_bonus_awarded', tru
 ?>
 
 <?php if (! $has_bonus): ?>
-<section id="gs-profile-progress-module" class="relative bg-white rounded-lg shadow p-6 mb-6">
+<section id="gs-profile-progress-module" class="relative bg-white rounded-lg shadow p-6 mb-8 transition-all">
   <button data-open-info="gs-info-puntos"
           class="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition"
           aria-label="Información de puntos">
@@ -95,7 +95,7 @@ $has_bonus    = get_user_meta($current_user->ID, 'gs_profile_bonus_awarded', tru
 <?php endif; ?>
 
       <!-- 🧾 Información del perfil -->
-      <section class="bg-white rounded-lg shadow p-6">
+      <section class="bg-white rounded-lg shadow p-6 transition-all">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">Información personal</h3>
 <?php
 $first_name = get_user_meta($current_user->ID, 'first_name', true);

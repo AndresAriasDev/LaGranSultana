@@ -31,24 +31,32 @@ function gs_save_user_profile() {
         }
     }
 
-    // Calcular progreso
+    // Calcular progreso del perfil
     $profile_data = gs_get_profile_completion($user_id);
     $completion   = $profile_data['percentage'];
     $missing      = $profile_data['missing'];
 
-    // Solo dar puntos una vez
-    if ($completion >= 100 && ! gs_has_received_points($user_id, 'profile_complete')) {
+    // Verificar si ya tenía puntos antes
+    $already_awarded = get_user_meta($user_id, 'gs_profile_bonus_awarded', true);
+    $bonus_just_awarded = false;
+
+    // Si acaba de completar al 100% por primera vez → dar puntos
+    if ($completion >= 100 && ! $already_awarded) {
         gs_add_points($user_id, 20, 'Perfil completo', 'profile_complete');
         update_user_meta($user_id, 'gs_profile_bonus_awarded', 1);
+        $bonus_just_awarded = true;
     }
 
     wp_send_json_success([
-        'message'    => $completion >= 100 ? '🎉 ¡Has completado tu perfil al 100%!' : 'Perfil actualizado correctamente.',
+        'message' => $completion >= 100 ? '🎉 ¡Has completado tu perfil al 100%!' : 'Perfil actualizado correctamente.',
         'completion' => $completion,
-        'points'     => gs_get_user_points($user_id),
-        'has_bonus'  => get_user_meta($user_id, 'gs_profile_bonus_awarded', true),
+        'points' => gs_get_user_points($user_id),
+        'has_bonus' => (bool) get_user_meta($user_id, 'gs_profile_bonus_awarded', true),
+        'bonus_just_awarded' => $bonus_just_awarded,
+        'missing' => $missing
     ]);
 }
+
 
 /* ========================================================
  * 2️⃣ CALCULAR EL PORCENTAJE DE PERFIL COMPLETADO
