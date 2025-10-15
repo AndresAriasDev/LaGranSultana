@@ -223,3 +223,23 @@ toast.style.backgroundColor = bgColor;
 
 /*********/
 
+window.togglePasswordVisibility = function (inputId, buttonEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  buttonEl.textContent = isHidden ? 'Ocultar' : 'Mostrar';
+};
+
+/*********/
+
+document.addEventListener('DOMContentLoaded', () => {
+  const toggleBtn = document.getElementById('gs-menu-toggle');
+  if (!toggleBtn) return;
+
+  toggleBtn.addEventListener('click', () => {
+    toggleBtn.classList.toggle('active');
+    // Aquí más adelante vas a mostrar/ocultar el menú móvil
+  });
+});

@@ -30,7 +30,17 @@
   font-display: swap;
 }
 
+/*ESTILOS PARA EL BOTON HAMBURGUESA MOVIL*/
 
+
+.hamb-line {
+  @apply block w-full h-[4px] bg-[var(--color-tx-cafe)] rounded transition-all duration-300 ease-in-out;
+}
+
+#gs-menu-toggle.active .hamb-line:nth-child(2) {
+  transform: translateX(12px);
+}
+/*FIN ESTILOS PARA EL BOTON HAMBURGUESA MOVIL*/
 
 @theme {
   --color-amarillo-pr: #F19123;
@@ -50,5 +60,6 @@
   --font-serif: "Playfair Display", serif;
 
 }
+
 
 @import "tailwindcss"
