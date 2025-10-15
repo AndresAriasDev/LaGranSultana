@@ -46,9 +46,10 @@ $user_roles   = $current_user->roles;
 
     <hr>
 
-    <form method="POST" action="<?php echo wp_logout_url( home_url('/login') ); ?>">
-        <button type="submit">Cerrar sesión</button>
-    </form>
+        <form method="POST" action="<?php echo wp_logout_url( home_url('/') ); ?>">
+            <button type="submit">Cerrar sesión</button>
+        </form>
+
 </div>
 
 <?php get_footer(); ?>
