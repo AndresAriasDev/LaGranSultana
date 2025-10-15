@@ -7,6 +7,7 @@
   <?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
+<?php wp_body_open(); ?>
 
 <header class="border-b min-h-[64px]" style="border-color: var(--color-borde); background-color: var(--color-blanco-pr);">
   <div class="w-[94%] mx-auto flex items-center justify-between py-4 px-2">

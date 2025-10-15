@@ -44,14 +44,17 @@ add_action('after_setup_theme', function() {
 /**
  * Incluir archivos modulares
  */
-require_once get_template_directory() . '/inc/roles.php';               // Roles personalizados base
+require_once get_template_directory() . '/inc/roles/roles.php';               // Roles personalizados base
 require_once get_template_directory() . '/inc/cpt/cpt-modelos.php';     // CPT Modelos
 require_once get_template_directory() . '/inc/cpt/cpt-fotos.php';       // CPT Fotos
 require_once get_template_directory() . '/inc/roles/rol-modelo.php';    // Lógica específica del rol Modelo
 require_once get_template_directory() . '/inc/auth/modal.php';
+require_once get_template_directory() . '/inc/modals/info-modal.php';
 require_once get_template_directory() . '/inc/shortcodes/register.php';
 require_once get_template_directory() . '/inc/shortcodes/login.php';
 require_once get_template_directory() . '/inc/auth/login-handler.php';
+// Sistema de puntos
+require_once get_template_directory() . '/inc/points/points-handler.php';
 require_once get_template_directory() . '/inc/auth/register-handler.php';
 add_action('wp_enqueue_scripts', function () {
     wp_enqueue_script(
@@ -103,3 +106,13 @@ wp_enqueue_script(
   '1.0.0',
   true // ⬅️ esto es lo importante
 );
+
+add_action('wp_enqueue_scripts', function() {
+  wp_enqueue_script(
+    'gs-info-modal',
+    get_template_directory_uri() . '/assets/js/info-modal.js',
+    array(),
+    '1.0.0',
+    true
+  );
+});

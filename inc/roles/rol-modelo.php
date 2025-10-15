@@ -3,22 +3,6 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Registrar el rol "Modelo"
- */
-function gran_sultana_add_modelo_role() {
-    add_role(
-        'modelo',
-        'Modelo',
-        array(
-            'read' => true,
-            'edit_posts' => false,
-            'delete_posts' => false,
-        )
-    );
-}
-add_action( 'init', 'gran_sultana_add_modelo_role' );
-
-/**
  * Crear automáticamente un CPT "modelo" cuando un usuario obtiene el rol
  */
 function gran_sultana_crear_cpt_para_modelo( $user_id, $role ) {
