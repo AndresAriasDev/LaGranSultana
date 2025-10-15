@@ -109,19 +109,15 @@ if (inner) {
 /****************************************************
  * 🧱 SECCIÓN 2: MANEJADOR DE REGISTRO (AJAX)
  ****************************************************/
+/****************************************************
+ * 🧱 SECCIÓN 2: MANEJADOR DE REGISTRO (AJAX)
+ ****************************************************/
 (function(){
   const form = document.getElementById('gs-register-form');
   if (!form) return;
 
   form.addEventListener('submit', async function(e){
     e.preventDefault();
-
-    const feedback = document.getElementById('gs-reg-feedback');
-    if (feedback) {
-      feedback.classList.remove('hidden');
-      feedback.className = 'rounded-md border px-3 py-2 text-sm bg-[var(--color-blanco-bajo)] text-[var(--color-tx-azul)]';
-      feedback.innerHTML = 'Procesando...';
-    }
 
     const formData = new FormData(form);
     formData.append('action', 'gs_handle_user_registration');
@@ -131,24 +127,19 @@ if (inner) {
       const result = await response.json();
 
       if (result.success) {
-  gsToast(result.data.message, 'success');
-  closeModal();
-  // 🔄 Recargar después de un pequeño delay para actualizar el header y la sesión visual
-  setTimeout(() => window.location.reload(), 1200);
-} else {
-        if (feedback) {
-          feedback.className = 'rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800';
-          feedback.innerHTML = result.data.message || 'Ocurrió un error.';
-        }
+        gsToast(result.data.message || 'Cuenta creada exitosamente.', 'success');
+        closeModal();
+        // 🔄 Recargar después de un pequeño delay para actualizar sesión visual
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        gsToast(result.data.message || 'Ocurrió un error durante el registro.', 'error');
       }
     } catch (error) {
-      if (feedback) {
-        feedback.className = 'rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800';
-        feedback.innerHTML = 'Error de conexión. Intenta de nuevo.';
-      }
+      gsToast('Error de conexión. Intenta de nuevo.', 'error');
     }
   });
 })();
+
 
 /****************************************************
  * 🧱 SECCIÓN 3: MANEJADOR DE LOGIN (AJAX)
