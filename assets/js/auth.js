@@ -168,7 +168,9 @@ if (inner) {
      if (result.success) {
   gsToast(result.data.message, 'success');
   closeModal();
-  setTimeout(() => window.location.reload(), 1200);
+  setTimeout(() => {
+  window.location.href = window.location.href.split('?')[0];
+}, 1200);
 } else {
   gsToast(result.data.message || 'Correo o contraseña incorrectos.', 'error');
 }
