@@ -233,13 +233,3 @@ window.togglePasswordVisibility = function (inputId, buttonEl) {
 };
 
 /*********/
-
-document.addEventListener('DOMContentLoaded', () => {
-  const toggleBtn = document.getElementById('gs-menu-toggle');
-  if (!toggleBtn) return;
-
-  toggleBtn.addEventListener('click', () => {
-    toggleBtn.classList.toggle('active');
-    // Aquí más adelante vas a mostrar/ocultar el menú móvil
-  });
-});
