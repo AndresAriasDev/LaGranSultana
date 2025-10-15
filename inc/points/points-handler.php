@@ -1,136 +1,109 @@
 <?php
 // 🚫 Evitar acceso directo
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined('ABSPATH') ) exit;
+
+/**
+ * 🎯 SISTEMA DE PUNTOS GLOBAL - La Gran Sultana
+ * Este archivo gestiona todos los puntos del usuario:
+ *  - Obtención y almacenamiento
+ *  - Suma / resta de puntos
+ *  - Prevención de duplicados
+ *  - Registro de razones / eventos
+ */
 
 /******************************************************
- * 🎯 SISTEMA DE PUNTOS - LA GRAN SULTANA
- * Archivo: inc/points/points-handler.php
- * Descripción: Controla la asignación y manejo de puntos de usuario.
+ * 🔹 Obtener puntos actuales de un usuario
  ******************************************************/
-
-/**
- * CONSTANTES GLOBALES
- * (Puedes ajustarlas según la lógica del negocio)
- */
-define('GS_POINTS_PROFILE_COMPLETE', 20); // Puntos por completar perfil
-define('GS_POINTS_REGISTER', 5);           // Puntos por registrarse
-define('GS_POINTS_FIRST_PURCHASE', 10);    // Puntos por primera compra futura
-
-
-/******************************************************
- * 🔹 FUNCIONES BASE
- ******************************************************/
-
-/**
- * Obtiene el total actual de puntos de un usuario
- */
-function gs_get_user_points($user_id) {
-    $points = (int) get_user_meta($user_id, '_user_points', true);
-    return max(0, $points); // nunca negativo
-}
-
-/**
- * Asigna puntos a un usuario
- */
-function gs_add_user_points($user_id, $amount, $reason = '') {
-    $current = gs_get_user_points($user_id);
-    $new_total = $current + (int) $amount;
-
-    update_user_meta($user_id, '_user_points', $new_total);
-
-    // Registrar log si querés histórico
-    gs_log_user_points($user_id, $amount, $reason);
-
-    return $new_total;
-}
-
-/**
- * Resta puntos a un usuario
- */
-function gs_remove_user_points($user_id, $amount, $reason = '') {
-    $current = gs_get_user_points($user_id);
-    $new_total = max(0, $current - (int) $amount);
-
-    update_user_meta($user_id, '_user_points', $new_total);
-    gs_log_user_points($user_id, -$amount, $reason);
-
-    return $new_total;
-}
-
-/**
- * Guarda un log de puntos (opcional)
- */
-function gs_log_user_points($user_id, $amount, $reason = '') {
-    $log = get_user_meta($user_id, '_points_log', true);
-    if ( ! is_array($log) ) $log = [];
-
-    $log[] = [
-        'date' => current_time('mysql'),
-        'amount' => $amount,
-        'reason' => $reason,
-    ];
-
-    update_user_meta($user_id, '_points_log', $log);
-}
-
-/**
- * Obtiene el porcentaje actual de perfil completado
- */
-function gs_get_profile_completion($user_id) {
-    return (int) get_user_meta($user_id, '_profile_completion', true);
-}
-
-/**
- * Actualiza el porcentaje de perfil completado según los campos
- */
-function gs_update_profile_completion($user_id) {
-    $user = get_userdata($user_id);
-
-    $fields = [
-        'first_name',
-        'phone',
-        'address',
-        'department',
-        'birth_date'
-    ];
-
-    $completed = 0;
-    foreach ($fields as $field) {
-        $value = get_user_meta($user_id, $field, true);
-        if ( ! empty($value) ) $completed++;
+if ( ! function_exists('gs_get_user_points') ) {
+    function gs_get_user_points( $user_id ) {
+        $points = (int) get_user_meta( $user_id, 'gs_points', true );
+        return $points > 0 ? $points : 0;
     }
-
-    $percentage = ($completed / count($fields)) * 100;
-    update_user_meta($user_id, '_profile_completion', $percentage);
-
-    // Si el usuario alcanzó 100%, darle puntos si aún no los tiene
-    if ($percentage == 100 && ! get_user_meta($user_id, '_profile_points_awarded', true)) {
-        gs_add_user_points($user_id, GS_POINTS_PROFILE_COMPLETE, 'Perfil completo');
-        update_user_meta($user_id, '_profile_points_awarded', true);
-    }
-
-    return $percentage;
 }
-
 
 /******************************************************
- * 🪄 EVENTOS AUTOMÁTICOS
+ * 🔹 Sumar puntos al usuario
  ******************************************************/
+if ( ! function_exists('gs_add_points') ) {
+    function gs_add_points( $user_id, $amount, $reason = '', $unique_key = '' ) {
+        if ( ! $user_id || $amount <= 0 ) return false;
 
-/**
- * Cuando un usuario se registra, darle puntos iniciales
- */
-function gs_points_on_user_register($user_id) {
-    gs_add_user_points($user_id, GS_POINTS_REGISTER, 'Registro de cuenta');
+        // Evitar duplicar puntos por el mismo evento (opcional)
+        if ( $unique_key && gs_has_received_points( $user_id, $unique_key ) ) {
+            return false;
+        }
+
+        $current = gs_get_user_points( $user_id );
+        $new_total = $current + $amount;
+
+        update_user_meta( $user_id, 'gs_points', $new_total );
+
+        // Guardar en historial (si lo quieres implementar después)
+        gs_log_points_event( $user_id, $amount, $reason, 'add' );
+
+        // Marcar el evento como completado (si se usó unique_key)
+        if ( $unique_key ) gs_mark_points_as_given( $user_id, $unique_key );
+
+        return $new_total;
+    }
 }
-add_action('user_register', 'gs_points_on_user_register');
 
-/**
- * Cuando el usuario actualiza su perfil desde el panel
- * (más adelante conectaremos este hook al formulario)
- */
-function gs_points_on_profile_update($user_id) {
-    gs_update_profile_completion($user_id);
+/******************************************************
+ * 🔹 Restar puntos al usuario
+ ******************************************************/
+if ( ! function_exists('gs_remove_points') ) {
+    function gs_remove_points( $user_id, $amount, $reason = '' ) {
+        if ( ! $user_id || $amount <= 0 ) return false;
+
+        $current = gs_get_user_points( $user_id );
+        $new_total = max( 0, $current - $amount );
+
+        update_user_meta( $user_id, 'gs_points', $new_total );
+        gs_log_points_event( $user_id, $amount, $reason, 'remove' );
+
+        return $new_total;
+    }
 }
-add_action('profile_update', 'gs_points_on_profile_update');
 
+/******************************************************
+ * 🔹 Verificar si un usuario ya recibió puntos por un evento
+ ******************************************************/
+if ( ! function_exists('gs_has_received_points') ) {
+    function gs_has_received_points( $user_id, $key ) {
+        $received = get_user_meta( $user_id, 'gs_points_awarded', true );
+        return is_array( $received ) && in_array( $key, $received );
+    }
+}
+
+/******************************************************
+ * 🔹 Marcar un evento de puntos como entregado
+ ******************************************************/
+if ( ! function_exists('gs_mark_points_as_given') ) {
+    function gs_mark_points_as_given( $user_id, $key ) {
+        $received = get_user_meta( $user_id, 'gs_points_awarded', true );
+        if ( ! is_array( $received ) ) $received = [];
+        if ( ! in_array( $key, $received ) ) {
+            $received[] = $key;
+            update_user_meta( $user_id, 'gs_points_awarded', $received );
+        }
+    }
+}
+
+/******************************************************
+ * 🔹 Registrar evento de puntos (historial interno)
+ ******************************************************/
+if ( ! function_exists('gs_log_points_event') ) {
+    function gs_log_points_event( $user_id, $amount, $reason = '', $type = 'add' ) {
+        $logs = get_user_meta( $user_id, 'gs_points_log', true );
+        if ( ! is_array( $logs ) ) $logs = [];
+
+        $logs[] = [
+            'date'   => current_time('mysql'),
+            'amount' => $amount,
+            'type'   => $type, // 'add' o 'remove'
+            'reason' => $reason,
+        ];
+
+        update_user_meta( $user_id, 'gs_points_log', $logs );
+    }
+}

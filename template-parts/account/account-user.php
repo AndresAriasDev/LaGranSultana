@@ -58,116 +58,125 @@ $current_user = wp_get_current_user();
           <p class="text-sm text-gray-500">Departamento / Extranjero</p>
         </div>
       </section>
-      <?php
-// Obtenemos el progreso del perfil y los puntos actuales
-$completion = gs_get_profile_completion($current_user->ID);
-$points     = gs_get_user_points($current_user->ID);
 
-// Determinar color según porcentaje (para un toque visual)
-if ($completion < 50) {
-  $bar_color = 'bg-red-400';
-} elseif ($completion < 80) {
-  $bar_color = 'bg-yellow-400';
-} else {
-  $bar_color = 'bg-green-500';
-}
+<?php
+$profile_data = gs_get_profile_completion($current_user->ID);
+$completion   = $profile_data['percentage'];
+$points       = gs_get_user_points($current_user->ID);
+$has_bonus    = get_user_meta($current_user->ID, 'gs_profile_bonus_awarded', true);
 ?>
 
-<!-- 🧮 PROGRESO Y PUNTOS -->
-<section class="relative bg-white rounded-lg shadow p-6 mb-6">
+<?php if (! $has_bonus): ?>
+<section id="gs-profile-progress-module" class="relative bg-white rounded-lg shadow p-6 mb-6">
+  <button data-open-info="gs-info-puntos"
+          class="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition"
+          aria-label="Información de puntos">
+      <img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/2025/10/usuario-cafe.png' ); ?>" 
+           alt="info" class="h-5 w-5 opacity-80 hover:opacity-100 transition">
+  </button>
 
-<button data-open-info="gs-info-puntos"
-        class="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition"
-        aria-label="Información de puntos">
-    <img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/2025/10/usuario-cafe.png' ); ?>" 
-         alt="info" 
-         class="h-5 w-5 opacity-80 hover:opacity-100 transition">
-</button>
-
-
-
-  <!-- 🔹 Porcentaje -->
   <div class="flex items-center justify-between mb-4">
-    <span class="text-sm text-gray-500"><?php echo intval($completion); ?>%</span>
+    <span class="text-sm text-gray-500" id="gs-profile-completion-text"><?php echo intval($completion); ?>%</span>
   </div>
 
-  <!-- Barra de progreso -->
   <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden mb-3">
-    <div class="<?php echo esc_attr($bar_color); ?> h-3 transition-all duration-500" style="width: <?php echo esc_attr($completion); ?>%;"></div>
+    <div id="gs-profile-progress-bar" 
+         class="h-3 transition-all duration-500 <?php echo ($completion < 50 ? 'bg-red-400' : ($completion < 80 ? 'bg-yellow-400' : 'bg-green-500')); ?>"
+         style="width: <?php echo intval($completion); ?>%;"></div>
   </div>
 
-  <!-- Puntos -->
   <div class="flex items-center justify-between mt-4">
     <span class="text-sm text-gray-600">Puntos acumulados:</span>
-    <span class="text-lg font-semibold" style="color: var(--color-amarillo-pr);">
+    <span id="gs-profile-points" class="text-lg font-semibold" style="color: var(--color-amarillo-pr);">
       <?php echo intval($points); ?> pts
     </span>
   </div>
-
 </section>
-
+<?php endif; ?>
 
       <!-- 🧾 Información del perfil -->
       <section class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">Información personal</h3>
-        <form class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label class="text-sm text-gray-600">Nombre</label>
-            <input type="text" class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none"
-                   placeholder="Nombre completo">
-          </div>
+<?php
+$first_name = get_user_meta($current_user->ID, 'first_name', true);
+if ( empty($first_name) ) $first_name = $current_user->display_name;
 
-          <div>
-            <label class="text-sm text-gray-600">Correo</label>
-            <input type="email" class="w-full mt-1 border rounded-md px-3 py-2 bg-gray-100 cursor-not-allowed"
-                   value="<?php echo esc_attr( $current_user->user_email ); ?>" readonly>
-          </div>
+$phone      = get_user_meta($current_user->ID, 'phone', true);
+$address    = get_user_meta($current_user->ID, 'address', true);
+$department = get_user_meta($current_user->ID, 'department', true);
+$birthdate  = get_user_meta($current_user->ID, 'birthdate', true);
+?>
 
-          <div>
-            <label class="text-sm text-gray-600">Teléfono</label>
-            <input type="text" class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none"
-                   placeholder="Número de teléfono">
-          </div>
 
-          <div>
-            <label class="text-sm text-gray-600">Dirección</label>
-            <input type="text" class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none"
-                   placeholder="Dirección completa">
-          </div>
+<form id="gs-user-profile-form" class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-          <div>
-            <label class="text-sm text-gray-600">Departamento</label>
-            <select class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none">
-              <option value="">Seleccionar...</option>
-              <option>Managua</option>
-              <option>Granada</option>
-              <option>León</option>
-              <option>Masaya</option>
-              <option>Chontales</option>
-              <option>Estelí</option>
-              <option>Rivas</option>
-              <option>Carazo</option>
-              <option>Matagalpa</option>
-              <option>Jinotega</option>
-              <option>RAAN</option>
-              <option>RAAS</option>
-              <option>Extranjero</option>
-            </select>
-          </div>
+  <div>
+    <label class="text-sm text-gray-600">Nombre</label>
+    <input type="text" 
+           name="first_name"
+           value="<?php echo esc_attr($first_name); ?>" 
+           class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none"
+           placeholder="Nombre completo">
+  </div>
 
-          <div>
-            <label class="text-sm text-gray-600">Fecha de nacimiento</label>
-            <input type="date" class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none">
-          </div>
+  <div>
+    <label class="text-sm text-gray-600">Correo</label>
+    <input type="email" 
+           value="<?php echo esc_attr( $current_user->user_email ); ?>" 
+           readonly
+           class="w-full mt-1 border rounded-md px-3 py-2 bg-gray-100 cursor-not-allowed">
+  </div>
 
-          <div class="md:col-span-2">
-            <button type="submit"
-              class="w-full mt-4 py-3 rounded-md font-medium text-white transition hover:opacity-90"
-              style="background-color: var(--color-amarillo-pr);">
-              Guardar cambios
-            </button>
-          </div>
-        </form>
+  <div>
+    <label class="text-sm text-gray-600">Teléfono</label>
+    <input type="text" 
+           name="phone"
+           value="<?php echo esc_attr($phone); ?>" 
+           class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none"
+           placeholder="Número de teléfono">
+  </div>
+
+  <div>
+    <label class="text-sm text-gray-600">Dirección</label>
+    <input type="text" 
+           name="address"
+           value="<?php echo esc_attr($address); ?>" 
+           class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none"
+           placeholder="Dirección completa">
+  </div>
+
+  <div>
+    <label class="text-sm text-gray-600">Departamento</label>
+    <select name="department"
+            class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none">
+      <option value="">Seleccionar...</option>
+      <?php
+      $departamentos = ["Managua", "Granada", "León", "Masaya", "Chontales", "Estelí", "Rivas", "Carazo", "Matagalpa", "Jinotega", "RAAN", "RAAS", "Extranjero"];
+      foreach ($departamentos as $d) {
+          $selected = ($department === $d) ? 'selected' : '';
+          echo "<option value='$d' $selected>$d</option>";
+      }
+      ?>
+    </select>
+  </div>
+
+  <div>
+    <label class="text-sm text-gray-600">Fecha de nacimiento</label>
+    <input type="date" 
+           name="birthdate"
+           value="<?php echo esc_attr($birthdate); ?>" 
+           class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none">
+  </div>
+
+  <div class="md:col-span-2">
+    <button type="submit"
+            class="w-full mt-4 py-3 rounded-md font-medium text-white transition hover:opacity-90"
+            style="background-color: var(--color-amarillo-pr);">
+      Guardar cambios
+    </button>
+  </div>
+</form>
+
       </section>
     </main>
 

@@ -53,6 +53,7 @@ require_once get_template_directory() . '/inc/modals/info-modal.php';
 require_once get_template_directory() . '/inc/shortcodes/register.php';
 require_once get_template_directory() . '/inc/shortcodes/login.php';
 require_once get_template_directory() . '/inc/auth/login-handler.php';
+require_once get_template_directory() . '/inc/users/profile.php';
 // Sistema de puntos
 require_once get_template_directory() . '/inc/points/points-handler.php';
 require_once get_template_directory() . '/inc/auth/register-handler.php';
@@ -116,3 +117,15 @@ add_action('wp_enqueue_scripts', function() {
     true
   );
 });
+
+wp_enqueue_script(
+  'gs-user-profile',
+  get_template_directory_uri() . '/assets/js/user-profile.js',
+  array('jquery'),
+  '1.0.0',
+  true
+);
+wp_localize_script('gs-user-profile', 'gsProfile', array(
+  'ajaxUrl' => admin_url('admin-ajax.php'),
+  'nonce'   => wp_create_nonce('gs_profile_nonce')
+));
