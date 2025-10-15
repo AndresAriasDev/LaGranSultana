@@ -36,25 +36,35 @@
   </div>
 
   <!-- Campo: Contraseña -->
-  <div class="relative">
-    <input id="gs_reg_pass" name="password" type="password" autocomplete="new-password" required
-      class="peer w-full rounded-md border border-[var(--color-borde)] bg-[var(--color-blanco-pr)] 
-             px-3 pt-5 pb-2 text-sm text-[var(--color-tx-negro)] focus:border-[var(--color-amarillo-pr)] 
-             focus:ring-2 focus:ring-[var(--color-amarillo-pr)] focus:outline-none transition-all" 
-      placeholder=" " />
-    <label for="gs_reg_pass"
-      class="absolute left-3 top-[-10px] text-[13px] text-[var(--color-tx-azul)] transition-all 
-             peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm 
-             peer-placeholder-shown:text-[var(--color-tx-azul)] 
-             peer-focus:top-1 peer-focus:text-xs peer-focus:text-[var(--color-amarillo-pr)]">
-      Contraseña
-    </label>
-  </div>
+<div class="relative">
+  <input id="gs_reg_pass" name="password" type="password" autocomplete="new-password" required
+    class="peer w-full rounded-md border border-[var(--color-borde)] bg-[var(--color-blanco-pr)] 
+           px-3 pr-20 pt-5 pb-2 text-sm text-[var(--color-tx-negro)] focus:border-[var(--color-amarillo-pr)] 
+           focus:ring-2 focus:ring-[var(--color-amarillo-pr)] focus:outline-none transition-all" 
+    placeholder=" " />
+  
+  <!-- Label flotante -->
+  <label for="gs_reg_pass"
+    class="absolute left-3 top-[-10px] text-[13px] text-[var(--color-tx-azul)] transition-all 
+           peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm 
+           peer-placeholder-shown:text-[var(--color-tx-azul)] 
+           peer-focus:top-1 peer-focus:text-xs peer-focus:text-[var(--color-amarillo-pr)]">
+    Contraseña
+  </label>
+
+  <!-- Botón Mostrar/Ocultar -->
+  <button type="button"
+    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-[var(--color-tx-azul)] 
+           hover:text-[var(--color-amarillo-pr)] transition-colors"
+    onclick="togglePasswordVisibility('gs_reg_pass', this)">
+    Mostrar
+  </button>
+</div>
 
   <!-- Aceptación de términos -->
   <div class="flex items-start gap-2">
     <input id="gs_reg_terms" name="terms" type="checkbox" required
-      class="mt-1 h-4 w-4 rounded border-[var(--color-borde)] text-[var(--color-amarillo-pr)] 
+      class="mt-0 h-4 w-4 rounded border-[var(--color-borde)] text-[var(--color-amarillo-pr)] 
              focus:ring-[var(--color-amarillo-pr)] focus:ring-offset-0" />
     <label for="gs_reg_terms" class="text-xs text-[var(--color-tx-negro)] leading-snug">
       Acepto los 
