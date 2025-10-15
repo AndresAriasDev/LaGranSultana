@@ -30,15 +30,25 @@
   font-display: swap;
 }
 
+/*ESTILOS PARA EL BOTON HAMBURGUESA MOVIL*/
 
+
+.hamb-line {
+  @apply block w-full h-[4px] bg-[var(--color-tx-cafe)] rounded transition-all duration-300 ease-in-out;
+}
+
+#gs-menu-toggle.active .hamb-line:nth-child(2) {
+  transform: translateX(8px);
+  background-color: #F19123;
+}
+/*FIN ESTILOS PARA EL BOTON HAMBURGUESA MOVIL*/
 
 @theme {
   --color-amarillo-pr: #F19123;
   --color-verde-pr: #A2C783;
-    --color-azul-pr: #8398C7;
-    
-    --color-blanco-pr: #ffffff;
-    --color-rojo-pr: #FD7171;
+  --color-azul-pr: #8398C7;
+  --color-blanco-pr: #ffffff;
+  --color-rojo-pr: #FD7171;
   --color-tx-azul: #576186;
   --color-tx-negro: #666666;
   --color-tx-cafe: #695A55;
@@ -51,5 +61,6 @@
   --font-serif: "Playfair Display", serif;
 
 }
+
 
 @import "tailwindcss"
