@@ -37,12 +37,30 @@
     </div>
 
     <!-- Botones -->
-    <div class="flex items-center space-x-5">
-      <a href="#" class="font-medium text-[16px] transition" style="color: var(--color-tx-cafe);">Entrar</a>
-      <a href="#" class="font-medium px-5 py-2.5 rounded-md" style="background-color: var(--color-amarillo-pr); color: var(--color-tx-blanco);">
-        Registrarse
-      </a>
-    </div>
+<div class="flex items-center space-x-5">
+  <?php if ( ! is_user_logged_in() ) : ?>
+    <!-- Usuario NO logueado -->
+    <button data-open-login
+      class="font-medium text-[16px] transition"
+      style="color: var(--color-tx-cafe);">
+      Entrar
+    </button>
+
+    <button data-open-register
+      class="font-medium px-5 py-2.5 rounded-md transition hover:opacity-90"
+      style="background-color: var(--color-amarillo-pr); color: var(--color-tx-blanco);">
+      Registrarse
+    </button>
+  <?php else : ?>
+    <!-- Usuario logueado -->
+    <a href="<?php echo esc_url( home_url('/mi-cuenta') ); ?>"
+      class="font-medium px-5 py-2.5 rounded-md transition hover:opacity-90"
+      style="background-color: var(--color-azul-pr); color: var(--color-tx-blanco);">
+      Mi cuenta
+    </a>
+  <?php endif; ?>
+</div>
+
 
   </div>
 

@@ -13,13 +13,32 @@
   /**
    * Abre el modal y muestra el modo indicado (login o registro)
    */
-  function openModal(mode = 'login') {
-    if (!modal || !overlay) return;
-    overlay.classList.remove('hidden');
-    modal.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
+function openModal(mode = 'login') {
+  if (!modal || !overlay) return;
+
+  // Ocultar ambos contenidos ANTES de mostrar el modal
+  loginContent.classList.add('hidden', 'opacity-0');
+  registerContent.classList.add('hidden', 'opacity-0');
+
+  // Mostrar modal y overlay
+  overlay.classList.remove('hidden');
+  modal.classList.remove('hidden');
+  document.body.classList.add('overflow-hidden');
+
+  const inner = modal.querySelector('.w-full.max-w-md');
+if (inner) {
+  inner.classList.add('opacity-0', 'scale-95');
+  setTimeout(() => {
+    inner.classList.remove('opacity-0', 'scale-95');
+    inner.classList.add('opacity-100', 'scale-100');
+  }, 50);
+}
+
+  // Asegurar que el contenido correcto aparece con un pequeño delay visual
+  setTimeout(() => {
     switchMode(mode);
-  }
+  }, 50);
+}
 
   /**
    * Cierra el modal completamente
@@ -112,9 +131,11 @@
       const result = await response.json();
 
       if (result.success) {
-        gsToast(result.data.message, 'success');
-        closeModal(); // ✅ cierra el modal correctamente
-      } else {
+  gsToast(result.data.message, 'success');
+  closeModal();
+  // 🔄 Recargar después de un pequeño delay para actualizar el header y la sesión visual
+  setTimeout(() => window.location.reload(), 1200);
+} else {
         if (feedback) {
           feedback.className = 'rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800';
           feedback.innerHTML = result.data.message || 'Ocurrió un error.';
@@ -153,15 +174,14 @@
       const response = await fetch(gsAuth.ajaxUrl, { method: 'POST', body: formData });
       const result = await response.json();
 
-      if (result.success) {
-        gsToast(result.data.message, 'success');
-        closeModal(); // ✅ ya está global
-      } else {
-        if (feedback) {
-          feedback.className = 'rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800';
-          feedback.innerHTML = result.data.message || 'Correo o contraseña incorrectos.';
-        }
-      }
+     if (result.success) {
+  gsToast(result.data.message, 'success');
+  closeModal();
+  setTimeout(() => window.location.reload(), 1200);
+} else {
+  gsToast(result.data.message || 'Correo o contraseña incorrectos.', 'error');
+}
+
     } catch (error) {
       if (feedback) {
         feedback.className = 'rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800';
@@ -179,11 +199,21 @@ window.gsToast = function(message, type = 'info') {
   if (!container) return;
 
   const toast = document.createElement('div');
-  toast.className = `
-    gs-toast px-4 py-2 text-sm font-medium rounded-md shadow-md text-white transform translate-x-[-120%] opacity-0
-    transition-all duration-300 ease-in-out pointer-events-auto
-    ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-gray-700'}
-  `;
+const bgColor =
+  type === 'success'
+    ? 'var(--color-verde-pr)'
+    : type === 'error'
+    ? 'var(--color-rojo-pr)'
+    : 'var(--color-azul-pr)';
+
+toast.className = `
+  gs-toast fixed bottom-5 left-5 z-[99999]
+  px-4 py-2 text-sm font-inter font-medium rounded-lg shadow-lg text-white
+  transform translate-x-[-120%] opacity-0 transition-all duration-300 ease-in-out pointer-events-auto
+`;
+
+toast.style.backgroundColor = bgColor;
+
   toast.textContent = message;
   container.appendChild(toast);
 
@@ -199,3 +229,6 @@ window.gsToast = function(message, type = 'info') {
     setTimeout(() => toast.remove(), 300);
   }, 3000);
 };
+
+/*********/
+
