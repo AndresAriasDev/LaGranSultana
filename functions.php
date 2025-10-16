@@ -129,3 +129,8 @@ wp_localize_script('gs-user-profile', 'gsProfile', array(
   'ajaxUrl' => admin_url('admin-ajax.php'),
   'nonce'   => wp_create_nonce('gs_profile_nonce')
 ));
+wp_enqueue_script('flatpickr', 'https://cdn.jsdelivr.net/npm/flatpickr', [], null, true);
+wp_enqueue_style('flatpickr-css', 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css');
+
+wp_enqueue_script('intlTelInput', 'https://cdn.jsdelivr.net/npm/intl-tel-input@18.5.1/build/js/intlTelInput.min.js', [], null, true);
+wp_enqueue_style('intlTelInput-css', 'https://cdn.jsdelivr.net/npm/intl-tel-input@18.5.1/build/css/intlTelInput.min.css');

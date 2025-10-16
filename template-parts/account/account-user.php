@@ -42,22 +42,59 @@ $current_user = wp_get_current_user();
     <!-- 👤 PANEL CENTRAL -->
     <main class="md:col-span-4 flex flex-col space-y-6">
 
-      <!-- 🧍 Perfil -->
-      <section class="bg-white rounded-lg shadow p-6 flex flex-col items-center space-y-4">
-        <div class="relative">
-          <img src="<?php echo esc_url( get_avatar_url( $current_user->ID, ['size' => 120] ) ); ?>"
-               alt="Foto de perfil"
-               class="w-28 h-28 rounded-full object-cover border border-gray-200">
-          <button class="absolute bottom-1 right-1 bg-[var(--color-azul-pr)] text-white text-xs px-2 py-1 rounded-full hover:opacity-90">
-            Cambiar
-          </button>
-        </div>
+<!-- 🧍 Perfil -->
+<section class="bg-white rounded-lg shadow p-6 flex flex-col items-center space-y-4">
+  <div class="relative">
+    <?php
+      $avatar_url = get_user_meta($current_user->ID, 'gs_profile_picture', true);
+      if (empty($avatar_url)) {
+        $avatar_url = get_avatar_url($current_user->ID, ['size' => 120]);
+      }
+    ?>
+    <img id="gs-user-avatar"
+         src="<?php echo esc_url($avatar_url); ?>"
+         alt="Foto de perfil"
+         class="w-28 h-28 rounded-full object-cover border border-gray-200 transition-all duration-300">
 
-        <div class="text-center">
-          <h2 class="text-xl font-semibold text-gray-800"><?php echo esc_html( $current_user->display_name ); ?></h2>
-          <p class="text-sm text-gray-500">Departamento / Extranjero</p>
-        </div>
-      </section>
+    <!-- Botón de cambio de imagen -->
+    <button type="button"
+            id="gs-change-avatar-btn"
+            class="absolute bottom-1 right-1 bg-[var(--color-blanco-pr)] border text-white p-1.5 rounded-full hover:opacity-90"
+            aria-label="Cambiar foto de perfil" style="border-color: var(--color-borde);">
+      <img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/2025/10/camara.png' ); ?>"
+           alt="Cambiar"
+           class="w-4 h-4">
+    </button>
+
+    <input type="file" id="gs-avatar-input" accept="image/*" class="hidden">
+  </div>
+
+  <div class="text-center">
+  <?php
+// Obtener el nombre completo desde el meta
+$full_name = trim(get_user_meta($current_user->ID, 'first_name', true));
+
+// Dividir el nombre por espacios
+$name_parts = preg_split('/\s+/', $full_name);
+
+// Calcular nombre + apellido (si existen)
+if (count($name_parts) >= 3) {
+    $display_name = $name_parts[0] . ' ' . $name_parts[2]; // ej: José López
+} elseif (count($name_parts) >= 2) {
+    $display_name = $name_parts[0] . ' ' . $name_parts[1]; // ej: José López
+} else {
+    $display_name = $name_parts[0]; // ej: José
+}
+?>
+<h2 class="text-xl font-semibold text-gray-800">
+  <?php echo esc_html($display_name); ?>
+</h2>
+    <p id="user-department" class="text-sm text-gray-500">
+    Departamento: <?php echo esc_html(get_user_meta($current_user->ID, 'department', true)); ?>
+</p>
+  </div>
+</section>
+
 
 <?php
 $profile_data = gs_get_profile_completion($current_user->ID);
@@ -93,92 +130,93 @@ $has_bonus    = get_user_meta($current_user->ID, 'gs_profile_bonus_awarded', tru
   </div>
 </section>
 <?php endif; ?>
+<!-- 🧾 Información del perfil -->
+<section class="bg-white rounded-xl shadow-sm border border-gray-100 p-7 transition-all">
+  <header class="flex items-center gap-2 mb-8 border-b border-gray-100 pb-3">
+    <h3 class="text-lg font-semibold text-gray-800">Información personal</h3>
+  </header>
 
-      <!-- 🧾 Información del perfil -->
-      <section class="bg-white rounded-lg shadow p-6 transition-all">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Información personal</h3>
-<?php
-$first_name = get_user_meta($current_user->ID, 'first_name', true);
-if ( empty($first_name) ) $first_name = $current_user->display_name;
+  <?php
+    $first_name = get_user_meta($current_user->ID, 'first_name', true);
+    $phone      = get_user_meta($current_user->ID, 'phone', true);
+    $address    = get_user_meta($current_user->ID, 'address', true);
+    $department = get_user_meta($current_user->ID, 'department', true);
+    $birthdate  = get_user_meta($current_user->ID, 'birthdate', true);
+    $gender     = get_user_meta($current_user->ID, 'gender', true);
+  ?>
 
-$phone      = get_user_meta($current_user->ID, 'phone', true);
-$address    = get_user_meta($current_user->ID, 'address', true);
-$department = get_user_meta($current_user->ID, 'department', true);
-$birthdate  = get_user_meta($current_user->ID, 'birthdate', true);
-?>
+  <form id="gs-user-profile-form" class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
 
+    <!-- Nombre -->
+    <div class="flex flex-col">
+      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Nombre completo</label>
+      <input type="text" name="first_name" value="<?php echo esc_attr($first_name); ?>" class="gs-input" placeholder="Tu nombre completo">
+    </div>
 
-<form id="gs-user-profile-form" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <!-- Correo -->
+    <div class="flex flex-col">
+      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Correo electrónico</label>
+      <input type="email" value="<?php echo esc_attr($current_user->user_email); ?>" readonly class="gs-input bg-gray-50 cursor-not-allowed text-gray-500">
+    </div>
 
-  <div>
-    <label class="text-sm text-gray-600">Nombre</label>
-    <input type="text" 
-           name="first_name"
-           value="<?php echo esc_attr($first_name); ?>" 
-           class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none"
-           placeholder="Nombre completo">
-  </div>
+    <!-- Teléfono -->
+    <div class="flex flex-col">
+      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Teléfono</label>
+      <input id="gs-phone-input" type="tel" name="phone" value="<?php echo esc_attr($phone); ?>" class="gs-input" placeholder="Ej: 88888888">
+    </div>
 
-  <div>
-    <label class="text-sm text-gray-600">Correo</label>
-    <input type="email" 
-           value="<?php echo esc_attr( $current_user->user_email ); ?>" 
-           readonly
-           class="w-full mt-1 border rounded-md px-3 py-2 bg-gray-100 cursor-not-allowed">
-  </div>
+    <!-- Dirección -->
+    <div class="flex flex-col">
+      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Dirección</label>
+      <input type="text" name="address" value="<?php echo esc_attr($address); ?>" class="gs-input" placeholder="Dirección completa">
+    </div>
 
-  <div>
-    <label class="text-sm text-gray-600">Teléfono</label>
-    <input type="text" 
-           name="phone"
-           value="<?php echo esc_attr($phone); ?>" 
-           class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none"
-           placeholder="Número de teléfono">
-  </div>
+    <!-- Departamento -->
+    <div class="flex flex-col">
+      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Departamento</label>
+      <select name="department" class="gs-input">
+        <option value="">Seleccionar...</option>
+        <?php
+          $departamentos = ["Managua","Granada","León","Masaya","Chontales","Estelí","Rivas","Carazo","Matagalpa","Jinotega","RAAN","RAAS","Extranjero"];
+          foreach ($departamentos as $d) {
+              $selected = ($department === $d) ? 'selected' : '';
+              echo "<option value='$d' $selected>$d</option>";
+          }
+        ?>
+      </select>
+    </div>
 
-  <div>
-    <label class="text-sm text-gray-600">Dirección</label>
-    <input type="text" 
-           name="address"
-           value="<?php echo esc_attr($address); ?>" 
-           class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none"
-           placeholder="Dirección completa">
-  </div>
+    <!-- Género -->
+    <div class="flex flex-col">
+      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Género</label>
+      <select name="gender" class="gs-input">
+        <option value="">Seleccionar...</option>
+        <option value="Masculino" <?php selected($gender, 'Masculino'); ?>>Masculino</option>
+        <option value="Femenino" <?php selected($gender, 'Femenino'); ?>>Femenino</option>
+        <option value="Otro" <?php selected($gender, 'Otro'); ?>>Otro</option>
+        <option value="Prefiero no decirlo" <?php selected($gender, 'Prefiero no decirlo'); ?>>Prefiero no decirlo</option>
+      </select>
+    </div>
 
-  <div>
-    <label class="text-sm text-gray-600">Departamento</label>
-    <select name="department"
-            class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none">
-      <option value="">Seleccionar...</option>
-      <?php
-      $departamentos = ["Managua", "Granada", "León", "Masaya", "Chontales", "Estelí", "Rivas", "Carazo", "Matagalpa", "Jinotega", "RAAN", "RAAS", "Extranjero"];
-      foreach ($departamentos as $d) {
-          $selected = ($department === $d) ? 'selected' : '';
-          echo "<option value='$d' $selected>$d</option>";
-      }
-      ?>
-    </select>
-  </div>
+    <!-- Fecha de nacimiento -->
+    <div class="flex flex-col">
+      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Fecha de nacimiento</label>
+      <input id="gs-birthdate" type="text" name="birthdate" value="<?php echo esc_attr($birthdate); ?>" class="gs-input" placeholder="Seleccionar fecha">
+    </div>
 
-  <div>
-    <label class="text-sm text-gray-600">Fecha de nacimiento</label>
-    <input type="date" 
-           name="birthdate"
-           value="<?php echo esc_attr($birthdate); ?>" 
-           class="w-full mt-1 border rounded-md px-3 py-2 focus:outline-none">
-  </div>
+    <!-- Botón -->
+    <div class="md:col-span-2 pt-3">
+      <button type="submit"
+              class="w-full mt-2 py-3.5 rounded-lg font-medium text-white shadow-sm transition hover:opacity-90 focus:ring-2 focus:ring-offset-2"
+              style="background-color: var(--color-amarillo-pr); focus:ring-color: var(--color-amarillo-pr);">
+        Guardar cambios
+      </button>
+    </div>
 
-  <div class="md:col-span-2">
-    <button type="submit"
-            class="w-full mt-4 py-3 rounded-md font-medium text-white transition hover:opacity-90"
-            style="background-color: var(--color-amarillo-pr);">
-      Guardar cambios
-    </button>
-  </div>
-</form>
+  </form>
+</section>
 
-      </section>
-    </main>
+</main>
 
     <!-- 🧭 PANEL DERECHO -->
     <aside class="md:col-span-1 flex flex-col space-y-4">
