@@ -68,20 +68,26 @@ $view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'perfil';
 
 
     <!-- 👑 CONTENIDO CENTRAL DINÁMICO -->
-    <main class="md:col-span-4 flex flex-col space-y-6">
-      <?php
-      // Detectar vista desde la URL (?view=)
-      $view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'perfil';
+<main class="md:col-span-4 flex flex-col space-y-6">
+  <?php
+  $view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'perfil';
+  $user = wp_get_current_user();
+  $is_model = in_array('modelo', (array) $user->roles);
 
-      if ($view === 'puntos') {
-          get_template_part('template-parts/account/account-points');
-      } elseif ($view === 'actividad') {
-          get_template_part('template-parts/account/account-activity');
+  if ($view === 'puntos') {
+      get_template_part('template-parts/modals/account-points');
+  } elseif ($view === 'actividad') {
+      get_template_part('template-parts/account/account-activity');
+  } else {
+      if ($is_model) {
+          get_template_part('template-parts/account/account-model-profile');
       } else {
           get_template_part('template-parts/account/account-user-profile');
       }
-      ?>
-    </main>
+  }
+  ?>
+</main>
+
 
     <!-- 🧭 PANEL DERECHO -->
     <aside class="md:col-span-1 flex flex-col space-y-4">

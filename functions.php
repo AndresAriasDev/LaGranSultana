@@ -54,6 +54,7 @@ require_once get_template_directory() . '/inc/shortcodes/register.php';
 require_once get_template_directory() . '/inc/shortcodes/login.php';
 require_once get_template_directory() . '/inc/auth/login-handler.php';
 require_once get_template_directory() . '/inc/users/profile.php';
+require_once get_template_directory() . '/inc/users/model-profile.php';
 // Sistema de puntos
 require_once get_template_directory() . '/inc/points/points-handler.php';
 require_once get_template_directory() . '/inc/auth/register-handler.php';

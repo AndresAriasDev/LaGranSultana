@@ -208,6 +208,90 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+/******************************************************
+ * 👠 PERFIL DE MODELO – GUARDADO AJAX
+ * (Similar al usuario normal pero con sus propios campos)
+ ******************************************************/
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("#gs-model-profile-form");
+  if (!form) {
+    console.log("⚠️ Formulario de modelo no encontrado");
+    return;
+  }
+  console.log("✅ Script del perfil de modelo activo");
+  const saveBtn = form.querySelector("button[type='submit']");
+  let hasChanges = false;
+
+  // 🔸 Detectar cambios
+  form.querySelectorAll("input, select, textarea").forEach((field) => {
+    field.addEventListener("input", () => {
+      hasChanges = true;
+      saveBtn.disabled = false;
+      saveBtn.classList.remove("opacity-60", "cursor-not-allowed");
+    });
+  });
+
+  // Desactivar por defecto
+  saveBtn.disabled = true;
+  saveBtn.classList.add("opacity-60", "cursor-not-allowed");
+
+  // 🔹 Guardar datos por AJAX
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!hasChanges) return;
+
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = "Guardando...";
+    saveBtn.disabled = true;
+
+    const formData = new FormData(form);
+    formData.append("action", "gs_save_model_profile");
+    formData.append("nonce", gsProfile.nonce);
+
+    try {
+      const response = await fetch(gsProfile.ajaxUrl, { method: "POST", body: formData });
+      const result = await response.json();
+
+      if (result.success) {
+        const data = result.data;
+        gsToast(data.message, "success");
+
+        // 🎯 Si completó el perfil por primera vez
+        if (data.bonus_just_awarded) {
+          queueToasts([
+            "🎉 ¡Has completado tu perfil de modelo al 100%! ",
+            "Has ganado 30 puntos por completar tu perfil 👏",
+          ]);
+        }
+
+      } else {
+        const msg = result.data?.message || "Error al guardar los datos.";
+        gsToast(msg, "error");
+
+        // Si fue error de teléfono
+        if (result.data?.field === "phone") {
+          const phoneField = form.querySelector("input[name='phone']");
+          if (phoneField) {
+            phoneField.value = "";
+            phoneField.focus();
+            phoneField.classList.add("border-red-400");
+            setTimeout(() => phoneField.classList.remove("border-red-400"), 2500);
+          }
+        }
+      }
+
+    } catch (err) {
+      console.error("❌ Error en AJAX:", err);
+      gsToast("Error de conexión. Intenta nuevamente.", "error");
+    } finally {
+      saveBtn.textContent = originalText;
+      hasChanges = false;
+      saveBtn.disabled = true;
+      saveBtn.classList.add("opacity-60", "cursor-not-allowed");
+    }
+  });
+});
+
 
 /******************************************************
  * ✨ Sistema de mensajes secuenciales
