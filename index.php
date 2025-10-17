@@ -15,7 +15,7 @@ get_header();
 <button data-open-register class="px-4 py-2 bg-[var(--color-amarillo-pr)] text-white rounded-md">
   Registrarse
 </button>
-
+<?php get_template_part('template-parts/modals/account-points');?>
 
 </main>
 

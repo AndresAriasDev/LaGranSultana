@@ -7,216 +7,81 @@ $current_user = wp_get_current_user();
 
 <!-- 🧩 CONTENEDOR PRINCIPAL -->
 <div class="min-h-screen bg-[var(--color-blanco-bajo)] py-10">
-
   <div class="w-[94%] mx-auto grid grid-cols-1 md:grid-cols-6 gap-6">
-
-    <!-- 📁 PANEL IZQUIERDO -->
-    <aside class="md:col-span-1 bg-white rounded-lg shadow p-4 flex flex-col space-y-3 h-max">
-      <a href="<?php echo esc_url( home_url('/') ); ?>" 
-         class="block text-[15px] py-2 px-3 rounded-md text-center transition hover:bg-gray-50 border"
-         style="color: var(--color-tx-cafe); border-color: var(--color-borde);">
-        Volver
-      </a>
-
-      <a href="#" 
-         class="block text-[15px] py-2 px-3 rounded-md text-center font-semibold text-white"
-         style="background-color: var(--color-azul-pr);">
-        Mi cuenta
-      </a>
-
-      <a href="#" 
-         class="block text-[15px] py-2 px-3 rounded-md text-center transition hover:bg-gray-50 border"
-         style="color: var(--color-tx-cafe); border-color: var(--color-borde);">
-        Actividad
-      </a>
-
-      <form method="POST" action="<?php echo wp_logout_url( home_url('/') ); ?>">
-        <button type="submit" 
-          class="w-full text-[15px] py-2 px-3 rounded-md text-center font-medium transition hover:opacity-90"
-          style="background-color: var(--color-amarillo-pr); color: var(--color-tx-blanco);">
-          Cerrar sesión
-        </button>
-      </form>
-    </aside>
-
-    <!-- 👤 PANEL CENTRAL -->
-    <main class="md:col-span-4 flex flex-col space-y-6">
-
-<!-- 🧍 Perfil -->
-<section class="bg-white rounded-lg shadow p-6 flex flex-col items-center space-y-4">
-  <div class="relative">
-    <?php
-      $avatar_url = get_user_meta($current_user->ID, 'gs_profile_picture', true);
-      if (empty($avatar_url)) {
-        $avatar_url = get_avatar_url($current_user->ID, ['size' => 120]);
-      }
-    ?>
-    <img id="gs-user-avatar"
-         src="<?php echo esc_url($avatar_url); ?>"
-         alt="Foto de perfil"
-         class="w-28 h-28 rounded-full object-cover border border-gray-200 transition-all duration-300">
-
-    <!-- Botón de cambio de imagen -->
-    <button type="button"
-            id="gs-change-avatar-btn"
-            class="absolute bottom-1 right-1 bg-[var(--color-blanco-pr)] border text-white p-1.5 rounded-full hover:opacity-90"
-            aria-label="Cambiar foto de perfil" style="border-color: var(--color-borde);">
-      <img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/2025/10/camara.png' ); ?>"
-           alt="Cambiar"
-           class="w-4 h-4">
-    </button>
-
-    <input type="file" id="gs-avatar-input" accept="image/*" class="hidden">
-  </div>
-
-  <div class="text-center">
-  <?php
-// Obtener el nombre completo desde el meta
-$full_name = trim(get_user_meta($current_user->ID, 'first_name', true));
-
-// Dividir el nombre por espacios
-$name_parts = preg_split('/\s+/', $full_name);
-
-// Calcular nombre + apellido (si existen)
-if (count($name_parts) >= 3) {
-    $display_name = $name_parts[0] . ' ' . $name_parts[2]; // ej: José López
-} elseif (count($name_parts) >= 2) {
-    $display_name = $name_parts[0] . ' ' . $name_parts[1]; // ej: José López
-} else {
-    $display_name = $name_parts[0]; // ej: José
-}
-?>
-<h2 class="text-xl font-semibold text-gray-800">
-  <?php echo esc_html($display_name); ?>
-</h2>
-    <p id="user-department" class="text-sm text-gray-500">
-    Departamento: <?php echo esc_html(get_user_meta($current_user->ID, 'department', true)); ?>
-</p>
-  </div>
-</section>
-
-
 <?php
-$profile_data = gs_get_profile_completion($current_user->ID);
-$completion   = $profile_data['percentage'];
-$points       = gs_get_user_points($current_user->ID);
-$has_bonus    = get_user_meta($current_user->ID, 'gs_profile_bonus_awarded', true);
+$view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'perfil';
 ?>
 
-<?php if (! $has_bonus): ?>
-<section id="gs-profile-progress-module" class="relative bg-white rounded-lg shadow p-6 mb-8 transition-all">
-  <button data-open-info="gs-info-puntos"
-          class="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition"
-          aria-label="Información de puntos">
-      <img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/2025/10/usuario-cafe.png' ); ?>" 
-           alt="info" class="h-5 w-5 opacity-80 hover:opacity-100 transition">
-  </button>
+<aside class="md:col-span-1 bg-white rounded-lg shadow p-4 flex flex-col space-y-3 h-max">
 
-  <div class="flex items-center justify-between mb-4">
-    <span class="text-sm text-gray-500" id="gs-profile-completion-text"><?php echo intval($completion); ?>%</span>
-  </div>
+  <a href="<?php echo esc_url( home_url('/') ); ?>" 
+     class="block text-[15px] py-2 px-3 rounded-md text-center transition hover:bg-gray-50 border"
+     style="color: var(--color-tx-cafe); border-color: var(--color-borde);">
+    Volver
+  </a>
 
-  <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden mb-3">
-    <div id="gs-profile-progress-bar" 
-         class="h-3 transition-all duration-500 <?php echo ($completion < 50 ? 'bg-red-400' : ($completion < 80 ? 'bg-yellow-400' : 'bg-green-500')); ?>"
-         style="width: <?php echo intval($completion); ?>%;"></div>
-  </div>
+  <!-- Mi cuenta -->
+  <a href="<?php echo esc_url( site_url('/mi-cuenta/') ); ?>"
+     class="block text-[15px] py-2 px-3 rounded-md text-center font-medium transition 
+            <?php echo ($view === 'perfil') 
+              ? 'text-white font-semibold' 
+              : 'text-[var(--color-tx-cafe)] hover:bg-gray-50 border'; ?>"
+     style="<?php echo ($view === 'perfil') 
+              ? 'background-color: var(--color-azul-pr);' 
+              : 'border-color: var(--color-borde);'; ?>">
+    Mi cuenta
+  </a>
 
-  <div class="flex items-center justify-between mt-4">
-    <span class="text-sm text-gray-600">Puntos acumulados:</span>
-    <span id="gs-profile-points" class="text-lg font-semibold" style="color: var(--color-amarillo-pr);">
-      <?php echo intval($points); ?> pts
-    </span>
-  </div>
-</section>
-<?php endif; ?>
-<!-- 🧾 Información del perfil -->
-<section class="bg-white rounded-xl shadow-sm border border-gray-100 p-7 transition-all">
-  <header class="flex items-center gap-2 mb-8 border-b border-gray-100 pb-3">
-    <h3 class="text-lg font-semibold text-gray-800">Información personal</h3>
-  </header>
+  <!-- Actividad -->
+  <a href="<?php echo esc_url( site_url('/mi-cuenta/?view=actividad') ); ?>"
+     class="block text-[15px] py-2 px-3 rounded-md text-center font-medium transition 
+            <?php echo ($view === 'actividad') 
+              ? 'text-white font-semibold' 
+              : 'text-[var(--color-tx-cafe)] hover:bg-gray-50 border'; ?>"
+     style="<?php echo ($view === 'actividad') 
+              ? 'background-color: var(--color-azul-pr);' 
+              : 'border-color: var(--color-borde);'; ?>">
+    Actividad
+  </a>
 
-  <?php
-    $first_name = get_user_meta($current_user->ID, 'first_name', true);
-    $phone      = get_user_meta($current_user->ID, 'phone', true);
-    $address    = get_user_meta($current_user->ID, 'address', true);
-    $department = get_user_meta($current_user->ID, 'department', true);
-    $birthdate  = get_user_meta($current_user->ID, 'birthdate', true);
-    $gender     = get_user_meta($current_user->ID, 'gender', true);
-  ?>
+  <!-- Puntos -->
+  <a href="<?php echo esc_url( site_url('/mi-cuenta/?view=puntos') ); ?>"
+     class="block text-[15px] py-2 px-3 rounded-md text-center font-medium transition 
+            <?php echo ($view === 'puntos') 
+              ? 'text-white font-semibold' 
+              : 'text-[var(--color-tx-cafe)] hover:bg-gray-50 border'; ?>"
+     style="<?php echo ($view === 'puntos') 
+              ? 'background-color: var(--color-azul-pr);' 
+              : 'border-color: var(--color-borde);'; ?>">
+    Puntos
+  </a>
 
-  <form id="gs-user-profile-form" class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
-
-    <!-- Nombre -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Nombre completo</label>
-      <input type="text" name="first_name" value="<?php echo esc_attr($first_name); ?>" class="gs-input" placeholder="Tu nombre completo">
-    </div>
-
-    <!-- Correo -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Correo electrónico</label>
-      <input type="email" value="<?php echo esc_attr($current_user->user_email); ?>" readonly class="gs-input bg-gray-50 cursor-not-allowed text-gray-500">
-    </div>
-
-    <!-- Teléfono -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Teléfono</label>
-      <input id="gs-phone-input" type="tel" name="phone" value="<?php echo esc_attr($phone); ?>" class="gs-input" placeholder="Ej: 88888888">
-    </div>
-
-    <!-- Dirección -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Dirección</label>
-      <input type="text" name="address" value="<?php echo esc_attr($address); ?>" class="gs-input" placeholder="Dirección completa">
-    </div>
-
-    <!-- Departamento -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Departamento</label>
-      <select name="department" class="gs-input">
-        <option value="">Seleccionar...</option>
-        <?php
-          $departamentos = ["Managua","Granada","León","Masaya","Chontales","Estelí","Rivas","Carazo","Matagalpa","Jinotega","RAAN","RAAS","Extranjero"];
-          foreach ($departamentos as $d) {
-              $selected = ($department === $d) ? 'selected' : '';
-              echo "<option value='$d' $selected>$d</option>";
-          }
-        ?>
-      </select>
-    </div>
-
-    <!-- Género -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Género</label>
-      <select name="gender" class="gs-input">
-        <option value="">Seleccionar...</option>
-        <option value="Masculino" <?php selected($gender, 'Masculino'); ?>>Masculino</option>
-        <option value="Femenino" <?php selected($gender, 'Femenino'); ?>>Femenino</option>
-        <option value="Otro" <?php selected($gender, 'Otro'); ?>>Otro</option>
-        <option value="Prefiero no decirlo" <?php selected($gender, 'Prefiero no decirlo'); ?>>Prefiero no decirlo</option>
-      </select>
-    </div>
-
-    <!-- Fecha de nacimiento -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Fecha de nacimiento</label>
-      <input id="gs-birthdate" type="text" name="birthdate" value="<?php echo esc_attr($birthdate); ?>" class="gs-input" placeholder="Seleccionar fecha">
-    </div>
-
-    <!-- Botón -->
-    <div class="md:col-span-2 pt-3">
-      <button type="submit"
-              class="w-full mt-2 py-3.5 rounded-lg font-medium text-white shadow-sm transition hover:opacity-90 focus:ring-2 focus:ring-offset-2"
-              style="background-color: var(--color-amarillo-pr); focus:ring-color: var(--color-amarillo-pr);">
-        Guardar cambios
-      </button>
-    </div>
-
+  <!-- Cerrar sesión -->
+  <form method="POST" action="<?php echo wp_logout_url( home_url('/') ); ?>">
+    <button type="submit" 
+      class="w-full text-[15px] py-2 px-3 rounded-md text-center font-medium transition hover:opacity-90"
+      style="background-color: var(--color-amarillo-pr); color: var(--color-tx-blanco);">
+      Cerrar sesión
+    </button>
   </form>
-</section>
+</aside>
 
-</main>
+
+    <!-- 👑 CONTENIDO CENTRAL DINÁMICO -->
+    <main class="md:col-span-4 flex flex-col space-y-6">
+      <?php
+      // Detectar vista desde la URL (?view=)
+      $view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'perfil';
+
+      if ($view === 'puntos') {
+          get_template_part('template-parts/modals/account-points');
+      } elseif ($view === 'actividad') {
+          get_template_part('template-parts/account/account-activity');
+      } else {
+          get_template_part('template-parts/account/account-user-profile');
+      }
+      ?>
+    </main>
 
     <!-- 🧭 PANEL DERECHO -->
     <aside class="md:col-span-1 flex flex-col space-y-4">

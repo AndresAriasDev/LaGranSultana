@@ -21,6 +21,8 @@ add_action('wp_body_open', function () {
 
             <!-- 🧠 Contenido dinámico (directo) -->
             <?php get_template_part('template-parts/modals/puntos-perfil-info'); ?>
+             <!-- 🧠 Contenido dinámico (directo) -->
+            <?php get_template_part('template-parts/modals/puntos-recompensa-info'); ?>
         </div>
     </div>
     <?php
