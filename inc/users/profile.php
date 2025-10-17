@@ -39,13 +39,16 @@ if (isset($_POST['phone'])) {
         ));
 
         if ($exists) {
+            // 🚫 Detener inmediatamente la ejecución y devolver error
             wp_send_json_error([
                 'message' => 'El número de teléfono ingresado ya está registrado en otra cuenta.',
                 'field'   => 'phone'
             ]);
+            exit;
         }
     }
 }
+
 
 // ✅ Si todo está correcto, proceder con la actualización normal
 foreach ($fields as $field) {
