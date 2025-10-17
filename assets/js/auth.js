@@ -107,85 +107,7 @@ if (inner) {
 })();
 
 /****************************************************
- * 🧱 SECCIÓN 2: MANEJADOR DE REGISTRO (AJAX)
- ****************************************************/
-/****************************************************
- * 🧱 SECCIÓN 2: MANEJADOR DE REGISTRO (AJAX)
- ****************************************************/
-(function(){
-  const form = document.getElementById('gs-register-form');
-  if (!form) return;
-
-  form.addEventListener('submit', async function(e){
-    e.preventDefault();
-
-    const formData = new FormData(form);
-    formData.append('action', 'gs_handle_user_registration');
-
-    try {
-      const response = await fetch(gsAuth.ajaxUrl, { method: 'POST', body: formData });
-      const result = await response.json();
-
-      if (result.success) {
-        gsToast(result.data.message || 'Cuenta creada exitosamente.', 'success');
-        closeModal();
-        // 🔄 Recargar después de un pequeño delay para actualizar sesión visual
-        setTimeout(() => window.location.reload(), 1200);
-      } else {
-        gsToast(result.data.message || 'Ocurrió un error durante el registro.', 'error');
-      }
-    } catch (error) {
-      gsToast('Error de conexión. Intenta de nuevo.', 'error');
-    }
-  });
-})();
-
-
-/****************************************************
- * 🧱 SECCIÓN 3: MANEJADOR DE LOGIN (AJAX)
- ****************************************************/
-(function(){
-  const form = document.getElementById('gs-login-form');
-  if (!form) return;
-
-  form.addEventListener('submit', async function(e){
-    e.preventDefault();
-
-    const feedback = document.getElementById('gs-login-feedback');
-    if (feedback) {
-      feedback.classList.remove('hidden');
-      feedback.className = 'rounded-md border px-3 py-2 text-sm bg-[var(--color-blanco-bajo)] text-[var(--color-tx-azul)]';
-      feedback.innerHTML = 'Verificando credenciales...';
-    }
-
-    const formData = new FormData(form);
-    formData.append('action', 'gs_handle_user_login');
-
-    try {
-      const response = await fetch(gsAuth.ajaxUrl, { method: 'POST', body: formData });
-      const result = await response.json();
-
-     if (result.success) {
-  gsToast(result.data.message, 'success');
-  closeModal();
-  setTimeout(() => {
-  window.location.href = window.location.href.split('?')[0];
-}, 1200);
-} else {
-  gsToast(result.data.message || 'Correo o contraseña incorrectos.', 'error');
-}
-
-    } catch (error) {
-      if (feedback) {
-        feedback.className = 'rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800';
-        feedback.innerHTML = 'Error de conexión. Intenta nuevamente.';
-      }
-    }
-  });
-})();
-
-/****************************************************
- * 🧱 SECCIÓN 4: SISTEMA DE NOTIFICACIONES (TOAST)
+ * 🧱 SECCIÓN SISTEMA DE NOTIFICACIONES (TOAST)
  ****************************************************/
 window.gsToast = function(message, type = 'info') {
   const container = document.getElementById('gs-toast-container');
@@ -222,6 +144,91 @@ toast.style.backgroundColor = bgColor;
     setTimeout(() => toast.remove(), 300);
   }, 3000);
 };
+
+/****************************************************
+ * 🧱 SECCIÓN 2: MANEJADOR DE REGISTRO (AJAX)
+ ****************************************************/
+/****************************************************
+ * 🧱 SECCIÓN 2: MANEJADOR DE REGISTRO (AJAX)
+ ****************************************************/
+(function(){
+  const form = document.getElementById('gs-register-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    formData.append('action', 'gs_handle_user_registration');
+
+    try {
+      const response = await fetch(gsAuth.ajaxUrl, { method: 'POST', body: formData });
+      const result = await response.json();
+
+      if (result.success) {
+  // Guardar una marca temporal en sessionStorage para mostrar después del reload
+  sessionStorage.setItem('registerSuccess', result.data.message || 'Cuenta creada exitosamente');
+
+  // Cerrar el modal inmediatamente
+  closeModal();
+
+  // Recargar sin esperar
+  window.location.reload();
+} else {
+        gsToast(result.data.message || 'Ocurrió un error durante el registro.', 'error');
+      }
+    } catch (error) {
+      gsToast('Error de conexión. Intenta de nuevo.', 'error');
+    }
+  });
+})();
+
+
+/****************************************************
+ * 🧱 SECCIÓN 3: MANEJADOR DE LOGIN (AJAX)
+ ****************************************************/
+(function(){
+  const form = document.getElementById('gs-login-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+
+    const feedback = document.getElementById('gs-login-feedback');
+    if (feedback) {
+      feedback.classList.remove('hidden');
+      feedback.className = 'rounded-md border px-3 py-2 text-sm bg-[var(--color-blanco-bajo)] text-[var(--color-tx-azul)]';
+      feedback.innerHTML = 'Verificando credenciales...';
+    }
+
+    const formData = new FormData(form);
+    formData.append('action', 'gs_handle_user_login');
+
+    try {
+      const response = await fetch(gsAuth.ajaxUrl, { method: 'POST', body: formData });
+      const result = await response.json();
+
+     if (result.success) {
+  // Guardar una marca temporal en sessionStorage
+  sessionStorage.setItem('loginSuccess', result.data.message || 'Inicio de sesión exitoso');
+  
+  // Cerrar el modal inmediatamente
+  closeModal();
+
+  // Recargar sin esperar
+  window.location.reload();
+} else {
+  gsToast(result.data.message || 'Correo o contraseña incorrectos.', 'error');
+}
+
+    } catch (error) {
+      if (feedback) {
+        feedback.className = 'rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800';
+        feedback.innerHTML = 'Error de conexión. Intenta nuevamente.';
+      }
+    }
+  });
+})();
 
 /*********/
 

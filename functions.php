@@ -44,14 +44,19 @@ add_action('after_setup_theme', function() {
 /**
  * Incluir archivos modulares
  */
-require_once get_template_directory() . '/inc/roles.php';               // Roles personalizados base
+require_once get_template_directory() . '/inc/roles/roles.php';               // Roles personalizados base
 require_once get_template_directory() . '/inc/cpt/cpt-modelos.php';     // CPT Modelos
 require_once get_template_directory() . '/inc/cpt/cpt-fotos.php';       // CPT Fotos
 require_once get_template_directory() . '/inc/roles/rol-modelo.php';    // Lógica específica del rol Modelo
 require_once get_template_directory() . '/inc/auth/modal.php';
+require_once get_template_directory() . '/inc/modals/info-modal.php';
 require_once get_template_directory() . '/inc/shortcodes/register.php';
 require_once get_template_directory() . '/inc/shortcodes/login.php';
 require_once get_template_directory() . '/inc/auth/login-handler.php';
+require_once get_template_directory() . '/inc/users/profile.php';
+require_once get_template_directory() . '/inc/users/model-profile.php';
+// Sistema de puntos
+require_once get_template_directory() . '/inc/points/points-handler.php';
 require_once get_template_directory() . '/inc/auth/register-handler.php';
 add_action('wp_enqueue_scripts', function () {
     wp_enqueue_script(
@@ -103,3 +108,37 @@ wp_enqueue_script(
   '1.0.0',
   true // ⬅️ esto es lo importante
 );
+
+// Script global para modales
+function gs_enqueue_modals_script() {
+    if (is_page('mi-cuenta')) {
+        wp_enqueue_script(
+            'gs-modals',
+            get_template_directory_uri() . '/assets/js/gs-modals.js',
+            array('jquery'),
+            filemtime(get_template_directory() . '/assets/js/gs-modals.js'),
+            true
+        );
+    }
+}
+add_action('wp_enqueue_scripts', 'gs_enqueue_modals_script');
+
+
+wp_enqueue_script(
+  'gs-user-profile',
+  get_template_directory_uri() . '/assets/js/user-profile.js',
+  array('jquery'),
+  '1.0.0',
+  true
+);
+wp_localize_script('gs-user-profile', 'gsProfile', array(
+  'ajaxUrl' => admin_url('admin-ajax.php'),
+  'nonce'   => wp_create_nonce('gs_profile_nonce')
+));
+
+
+wp_enqueue_script('flatpickr', 'https://cdn.jsdelivr.net/npm/flatpickr', [], null, true);
+wp_enqueue_style('flatpickr-css', 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css');
+
+wp_enqueue_script('intlTelInput', 'https://cdn.jsdelivr.net/npm/intl-tel-input@18.5.1/build/js/intlTelInput.min.js', [], null, true);
+wp_enqueue_style('intlTelInput-css', 'https://cdn.jsdelivr.net/npm/intl-tel-input@18.5.1/build/css/intlTelInput.min.css');

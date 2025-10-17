@@ -41,3 +41,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === menuOverlay) closeMenu();
   });
 });
+
+/* 🔔 FUNCION PARA MOSTRAR MENSAJES DE ÉXITO POST-RELOAD */
+window.addEventListener('load', () => {
+  // Mensaje de login
+  const loginMsg = sessionStorage.getItem('loginSuccess');
+  if (loginMsg && typeof gsToast === 'function') {
+    gsToast(loginMsg, 'success');
+    sessionStorage.removeItem('loginSuccess');
+  }
+
+  // Mensaje de registro
+  const registerMsg = sessionStorage.getItem('registerSuccess');
+  if (registerMsg && typeof gsToast === 'function') {
+    gsToast(registerMsg, 'success');
+    sessionStorage.removeItem('registerSuccess');
+  }
+});
+
