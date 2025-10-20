@@ -59,6 +59,12 @@ function gs_render_common_profile_fields($user_id, $include = []) {
       'type'  => 'text',
       'placeholder' => 'Tu dirección exacta',
     ],
+    'birthdate' => [
+      'label' => 'Fecha de nacimiento',
+      'type'  => 'date',
+      'id'    => 'gs-birthdate',
+      'placeholder' => 'Selecciona tu fecha de nacimiento',
+    ],
     'gender' => [
       'label' => 'Género',
       'type'  => 'select',

@@ -90,6 +90,7 @@ $has_bonus    = get_user_meta($current_user->ID, 'gs_model_profile_bonus_awarded
         'phone',
         'department',
         'address',
+        'birthdate',
         'gender'
       ]);
     ?>
