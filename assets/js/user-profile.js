@@ -99,8 +99,10 @@ if (pointsText) {
 
 // 🎯 Si completó el perfil por primera vez
 if (completion >= 100 && data.bonus_just_awarded) {
+    const awarded = data.bonus_points_given || 20; // fallback
   queueToasts([
-    "Has ganado 20 puntos por completar tu perfil 👏",
+    "🎉 ¡Has completado tu perfil al 100%! ",
+    `Has ganado ${awarded} puntos por completar tu perfil 👏`,
   ]);
 
   if (progressModule) {
@@ -253,10 +255,22 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+/******************************************************
+ * 📈 Animación de puntos
+ ******************************************************/
+function animatePoints(element, from, to, duration = 1000) {
+  const start = performance.now();
+  function step(timestamp) {
+    const progress = Math.min((timestamp - start) / duration, 1);
+    const value = Math.floor(from + (to - from) * progress);
+    element.textContent = `${value} pts`;
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
 
 /******************************************************
  * 👠 PERFIL DE MODELO – GUARDADO AJAX
- * (Similar al usuario normal pero con sus propios campos)
  ******************************************************/
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("#gs-model-profile-form");
@@ -265,10 +279,18 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
   console.log("✅ Script del perfil de modelo activo");
+
   const saveBtn = form.querySelector("button[type='submit']");
+  const progressBar = document.querySelector("#gs-profile-progress-bar");
+  const completionText = document.querySelector("#gs-profile-completion-text");
+  const pointsText = document.querySelector("#gs-profile-points");
+  const progressModule = document.querySelector("#gs-profile-progress-module");
+
   let hasChanges = false;
 
-  // 🔸 Detectar cambios
+  /******************************************************
+   * Detectar cambios en los campos
+   ******************************************************/
   form.querySelectorAll("input, select, textarea").forEach((field) => {
     field.addEventListener("input", () => {
       hasChanges = true;
@@ -281,7 +303,9 @@ document.addEventListener("DOMContentLoaded", () => {
   saveBtn.disabled = true;
   saveBtn.classList.add("opacity-60", "cursor-not-allowed");
 
-  // 🔹 Guardar datos por AJAX
+  /******************************************************
+   * Guardar datos del perfil
+   ******************************************************/
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!hasChanges) return;
@@ -295,48 +319,79 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("nonce", gsProfile.nonce);
 
     try {
-      const response = await fetch(gsProfile.ajaxUrl, { method: "POST", body: formData });
+      const response = await fetch(gsProfile.ajaxUrl, {
+        method: "POST",
+        body: formData,
+      });
       const result = await response.json();
 
-      if (result.success) {
-        const data = result.data;
-        gsToast(data.message, "success");
-
-        // 🎯 Si completó el perfil por primera vez
-        if (data.bonus_just_awarded) {
-          queueToasts([
-          "🎉 ¡Has completado tu perfil al 100%! ",
-          "Has ganado 20 puntos por completar tu perfil 👏",
-        ]);
-        }
-
-      } else {
+      if (!result.success) {
+        // ⚠️ Error devuelto desde PHP
         const msg = result.data?.message || "Error al guardar los datos.";
         gsToast(msg, "error");
 
-        // Si fue error de teléfono
         if (result.data?.field === "phone") {
           const phoneField = form.querySelector("input[name='phone']");
           if (phoneField) {
             phoneField.focus();
             phoneField.classList.add("border-red-400");
-
-            // 🔹 Reactivar el botón de guardar para permitir corregir y reenviar
             saveBtn.disabled = false;
             saveBtn.classList.remove("opacity-60", "cursor-not-allowed");
-
-            // 🔹 Escuchar cuando el usuario empiece a corregir el número
             phoneField.addEventListener(
               "input",
-              () => {
-                phoneField.classList.remove("border-red-400");
-              },
+              () => phoneField.classList.remove("border-red-400"),
               { once: true }
             );
           }
         }
+        return;
       }
 
+      /******************************************************
+       * ✅ ÉXITO
+       ******************************************************/
+      const data = result.data;
+      const completion = data.completion ? parseFloat(data.completion) : 0;
+      const points = data.points || 0;
+
+      gsToast(data.message, "success");
+
+      // 🔄 Actualizar barra de progreso
+      if (progressBar && completionText) {
+        progressBar.style.width = `${completion}%`;
+        completionText.textContent = `${completion}%`;
+        progressBar.className =
+          "h-3 transition-all duration-500 " +
+          (completion < 50
+            ? "bg-red-400"
+            : completion < 80
+            ? "bg-yellow-400"
+            : "bg-green-500");
+      }
+
+      // 🔢 Actualizar puntos con animación
+      if (pointsText) {
+        const currentPoints = parseInt(pointsText.textContent) || 0;
+        animatePoints(pointsText, currentPoints, points);
+      }
+
+      // 🎯 Si completó por primera vez
+      if (data.bonus_just_awarded) {
+        const awarded = data.bonus_points_given || 30;
+        queueToasts([
+          "🎉 ¡Has completado tu perfil al 100%! ",
+          `Has ganado ${awarded} puntos por completar tu perfil 👏`,
+        ]);
+
+        if (progressModule) {
+          progressModule.style.transition =
+            "opacity 0.8s ease, transform 0.8s ease, margin 0.8s ease";
+          progressModule.style.opacity = "0";
+          progressModule.style.transform = "translateY(-20px)";
+          progressModule.style.marginBottom = "0";
+          setTimeout(() => progressModule.remove(), 900);
+        }
+      }
     } catch (err) {
       console.error("❌ Error en AJAX:", err);
       gsToast("Error de conexión. Intenta nuevamente.", "error");
@@ -348,7 +403,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
 
 /******************************************************
  * ✨ Sistema de mensajes secuenciales

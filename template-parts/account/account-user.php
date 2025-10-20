@@ -74,17 +74,21 @@ $view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'perfil';
   $user = wp_get_current_user();
   $is_model = in_array('modelo', (array) $user->roles);
 
-  if ($view === 'puntos') {
-      get_template_part('template-parts/account/account-points');
-  } elseif ($view === 'actividad') {
-      get_template_part('template-parts/account/account-activity');
-  } else {
-      if ($is_model) {
-          get_template_part('template-parts/account/account-model-profile');
-      } else {
-          get_template_part('template-parts/account/account-user-profile');
-      }
-  }
+if ($view === 'puntos') {
+    if ($is_model) {
+        get_template_part('template-parts/account/model/account-model-points');
+    } else {
+        get_template_part('template-parts/account/account-points');
+    }
+} elseif ($view === 'actividad') {
+    get_template_part('template-parts/account/account-activity');
+} else {
+    if ($is_model) {
+        get_template_part('template-parts/account/account-model-profile');
+    } else {
+        get_template_part('template-parts/account/account-user-profile');
+    }
+}
   ?>
 </main>
 
