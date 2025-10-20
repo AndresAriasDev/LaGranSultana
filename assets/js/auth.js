@@ -109,41 +109,43 @@ if (inner) {
 /****************************************************
  * 🧱 SECCIÓN SISTEMA DE NOTIFICACIONES (TOAST)
  ****************************************************/
-window.gsToast = function(message, type = 'info') {
-  const container = document.getElementById('gs-toast-container');
-  if (!container) return;
+function gsToast(message, type = "success", duration = 3000) {
+  // Asegurarse de que el contenedor exista
+  let container = document.getElementById("gs-toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "gs-toast-container";
+    container.className =
+      "fixed bottom-5 left-5 flex flex-col gap-2 z-[9999]";
+    document.body.appendChild(container);
+  }
 
-  const toast = document.createElement('div');
-const bgColor =
-  type === 'success'
-    ? 'var(--color-verde-pr)'
-    : type === 'error'
-    ? 'var(--color-rojo-pr)'
-    : 'var(--color-azul-pr)';
-
-toast.className = `
-  gs-toast fixed bottom-5 left-5 z-[99999]
-  px-4 py-2 text-sm font-inter font-medium rounded-lg shadow-lg text-white
-  transform translate-x-[-120%] opacity-0 transition-all duration-300 ease-in-out pointer-events-auto
-`;
-
-toast.style.backgroundColor = bgColor;
-
+  // Crear el toast individual
+  const toast = document.createElement("div");
+  toast.className = `
+    px-4 py-2 rounded-lg shadow-md text-white text-sm font-medium
+    transition-all duration-500 transform translate-y-5 opacity-0
+    ${type === "error" ? "bg-red-500" : "bg-green-500"}
+  `;
   toast.textContent = message;
+
+  // Insertar al final del contenedor
   container.appendChild(toast);
 
-  // Animación de entrada
-  setTimeout(() => {
-    toast.classList.remove('translate-x-[-120%]', 'opacity-0');
-    toast.classList.add('translate-x-0', 'opacity-100');
-  }, 50);
+  // Animar aparición
+  requestAnimationFrame(() => {
+    toast.classList.remove("translate-y-5", "opacity-0");
+  });
 
-  // Desaparición automática
+  // Remover después de X segundos
   setTimeout(() => {
-    toast.classList.add('translate-x-[-120%]', 'opacity-0');
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
-};
+    toast.classList.add("opacity-0", "translate-y-5");
+    setTimeout(() => {
+      toast.remove();
+    }, 500);
+  }, duration);
+}
+
 
 /****************************************************
  * 🧱 SECCIÓN 2: MANEJADOR DE REGISTRO (AJAX)

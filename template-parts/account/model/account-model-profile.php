@@ -2,6 +2,9 @@
 if (!defined('ABSPATH')) exit;
 
 $current_user = wp_get_current_user();
+
+// 🧩 Importar campos comunes reutilizables
+require_once get_template_directory() . '/inc/users/partials/fields-common.php';
 ?>
 
 <!-- 🧍 PERFIL DE MODELO -->
@@ -45,94 +48,55 @@ $current_user = wp_get_current_user();
     <h3 class="text-lg font-semibold text-gray-800">Información personal</h3>
   </header>
 
-  <?php
-    $fields = [
-      'first_name'  => get_user_meta($current_user->ID, 'first_name', true),
-      'display_name_custom' => get_user_meta($current_user->ID, 'display_name_custom', true),
-      'bio'         => get_user_meta($current_user->ID, 'bio', true),
-      'phone'       => get_user_meta($current_user->ID, 'phone', true),
-      'instagram'   => get_user_meta($current_user->ID, 'instagram', true),
-      'height'      => get_user_meta($current_user->ID, 'height', true),
-      'weight'      => get_user_meta($current_user->ID, 'weight', true),
-      'measurements'=> get_user_meta($current_user->ID, 'measurements', true),
-      'department'  => get_user_meta($current_user->ID, 'department', true),
-      'gender'      => get_user_meta($current_user->ID, 'gender', true),
-      'gs_referral_code' => get_user_meta($current_user->ID, 'gs_referral_code', true),
-    ];
-  ?>
+  <form id="gs-model-profile-form" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
 
-<form id="gs-model-profile-form" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
-
-    <!-- Nombre real -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Nombre completo</label>
-      <input type="text" name="first_name" value="<?php echo esc_attr($fields['first_name']); ?>" class="gs-input" placeholder="Tu nombre real">
-    </div>
-
-    <!-- Nombre artístico -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Nombre artístico</label>
-      <input type="text" name="display_name_custom" value="<?php echo esc_attr($fields['display_name_custom']); ?>" class="gs-input" placeholder="Ejemplo: Miriam Avilés">
-    </div>
-
-    <!-- Biografía -->
-    <div class="md:col-span-2 flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Biografía</label>
-      <textarea name="bio" rows="3" class="gs-input"><?php echo esc_textarea($fields['bio']); ?></textarea>
-    </div>
-
-    <!-- Teléfono -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Teléfono</label>
-      <input type="tel" name="phone" value="<?php echo esc_attr($fields['phone']); ?>" class="gs-input" placeholder="Ej: 88888888">
-    </div>
-
-    <!-- Instagram -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Instagram</label>
-      <input type="text" name="instagram" value="<?php echo esc_attr($fields['instagram']); ?>" class="gs-input" placeholder="@usuario">
-    </div>
+    <?php
+      // ✅ Campos comunes reutilizados
+      gs_render_common_profile_fields($current_user->ID, [
+        'first_name',
+        'phone',
+        'department',
+        'address',
+        'gender'
+      ]);
+    ?>
 
     <!-- Altura -->
     <div class="flex flex-col">
       <label class="text-[15px] font-medium text-gray-700 mb-1.5">Altura (cm)</label>
-      <input type="number" name="height" value="<?php echo esc_attr($fields['height']); ?>" class="gs-input" placeholder="Ej: 170">
+      <input type="number" name="height"
+             value="<?php echo esc_attr(get_user_meta($current_user->ID, 'height', true)); ?>"
+             class="gs-input" placeholder="Ej: 170">
     </div>
 
     <!-- Peso -->
     <div class="flex flex-col">
       <label class="text-[15px] font-medium text-gray-700 mb-1.5">Peso (kg)</label>
-      <input type="number" name="weight" value="<?php echo esc_attr($fields['weight']); ?>" class="gs-input" placeholder="Ej: 55">
+      <input type="number" name="weight"
+             value="<?php echo esc_attr(get_user_meta($current_user->ID, 'weight', true)); ?>"
+             class="gs-input" placeholder="Ej: 55">
     </div>
 
     <!-- Medidas -->
     <div class="flex flex-col">
       <label class="text-[15px] font-medium text-gray-700 mb-1.5">Medidas (busto-cintura-cadera)</label>
-      <input type="text" name="measurements" value="<?php echo esc_attr($fields['measurements']); ?>" class="gs-input" placeholder="Ej: 90-60-90">
+      <input type="text" name="measurements"
+             value="<?php echo esc_attr(get_user_meta($current_user->ID, 'measurements', true)); ?>"
+             class="gs-input" placeholder="Ej: 90-60-90">
     </div>
 
-    <!-- Departamento -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Departamento</label>
-      <input type="text" name="department" value="<?php echo esc_attr($fields['department']); ?>" class="gs-input" placeholder="Ej: Managua">
-    </div>
-
-    <!-- Género -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Género</label>
-      <select name="gender" class="gs-input">
-        <option value="">Seleccionar...</option>
-        <option value="Femenino" <?php selected($fields['gender'], 'Femenino'); ?>>Femenino</option>
-        <option value="Masculino" <?php selected($fields['gender'], 'Masculino'); ?>>Masculino</option>
-        <option value="Otro" <?php selected($fields['gender'], 'Otro'); ?>>Otro</option>
-      </select>
-    </div>
-
-    <!-- Código de referido -->
-    <div class="flex flex-col">
-      <label class="text-[15px] font-medium text-gray-700 mb-1.5">Código de referido</label>
-      <input type="text" name="gs_referral_code" value="<?php echo esc_attr($fields['gs_referral_code']); ?>" class="gs-input bg-gray-50 cursor-not-allowed text-gray-500" readonly>
-    </div>
+    <!-- Código de referido (solo lectura, opcional) -->
+    <?php
+      $ref_code = get_user_meta($current_user->ID, 'gs_referral_code', true);
+      if (!empty($ref_code)) :
+    ?>
+      <div class="flex flex-col">
+        <label class="text-[15px] font-medium text-gray-700 mb-1.5">Código de referido</label>
+        <input type="text" readonly
+               value="<?php echo esc_attr($ref_code); ?>"
+               class="gs-input bg-gray-50 cursor-not-allowed text-gray-500">
+      </div>
+    <?php endif; ?>
 
     <!-- Botón guardar -->
     <div class="md:col-span-2 pt-3">
@@ -142,5 +106,6 @@ $current_user = wp_get_current_user();
         Guardar cambios
       </button>
     </div>
+
   </form>
 </section>

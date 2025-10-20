@@ -75,7 +75,7 @@ $view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'perfil';
   $is_model = in_array('modelo', (array) $user->roles);
 
   if ($view === 'puntos') {
-      get_template_part('template-parts/modals/account-points');
+      get_template_part('template-parts/account/account-points');
   } elseif ($view === 'actividad') {
       get_template_part('template-parts/account/account-activity');
   } else {

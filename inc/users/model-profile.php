@@ -4,6 +4,7 @@ if (!defined('ABSPATH')) exit;
 /**
  * ========================================================
  * 🎯 PERFIL DE MODELO – La Gran Sultana
+ * --------------------------------------------------------
  * Este archivo maneja:
  *  - Guardado de información personal (AJAX)
  *  - Cálculo del progreso del perfil
@@ -23,18 +24,16 @@ function gs_save_model_profile() {
         wp_send_json_error(['message' => 'No hay sesión activa.']);
     }
 
-    // Campos del formulario del modelo
+    // 🧩 Campos del formulario del modelo
     $fields = [
         'first_name',
-        'display_name_custom',
-        'bio',
         'phone',
-        'instagram',
+        'department',
+        'address',
+        'gender',
         'height',
         'weight',
         'measurements',
-        'department',
-        'gender'
     ];
 
     global $wpdb;
@@ -80,7 +79,9 @@ function gs_save_model_profile() {
     }
 
     wp_send_json_success([
-        'message' => $completion >= 100 ? '🎉 ¡Has completado tu perfil al 100%!' : 'Perfil actualizado correctamente.',
+        'message' => $completion >= 100 
+            ? '🎉 ¡Has completado tu perfil al 100%!' 
+            : 'Perfil actualizado correctamente.',
         'completion' => $completion,
         'points' => gs_get_user_points($user_id),
         'bonus_just_awarded' => $bonus_just_awarded,
@@ -93,16 +94,14 @@ function gs_save_model_profile() {
  *******************************************************/
 function gs_get_model_profile_completion($user_id) {
     $fields = [
-        'first_name'          => 'Nombre completo',
-        'display_name_custom' => 'Nombre artístico',
-        'bio'                 => 'Biografía',
-        'phone'               => 'Teléfono',
-        'instagram'           => 'Instagram',
-        'height'              => 'Altura',
-        'weight'              => 'Peso',
-        'measurements'        => 'Medidas',
-        'department'          => 'Departamento',
-        'gender'              => 'Género',
+        'first_name'   => 'Nombre completo',
+        'phone'        => 'Teléfono',
+        'department'   => 'Departamento',
+        'address'      => 'Dirección',
+        'gender'       => 'Género',
+        'height'       => 'Altura',
+        'weight'       => 'Peso',
+        'measurements' => 'Medidas',
     ];
 
     $filled = 0;

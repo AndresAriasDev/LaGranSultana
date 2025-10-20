@@ -50,62 +50,66 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch(gsProfile.ajaxUrl, { method: "POST", body: formData });
       const result = await response.json();
 
-if (result.success) {
-  const data = result.data;
-  const completion = data.completion || 0;
-
-  // ✅ Mostrar mensaje base de guardado
-  gsToast("Cambios guardados correctamente.", "success");
-
-  // 🔄 Actualizar barra y puntos solo si todo salió bien
-  if (progressBar && completionText) {
-    progressBar.style.width = `${completion}%`;
-    completionText.textContent = `${completion}%`;
-
-    progressBar.className =
-      "h-3 transition-all duration-500 " +
-      (completion < 50
-        ? "bg-red-400"
-        : completion < 80
-        ? "bg-yellow-400"
-        : "bg-green-500");
-  }
-
-  if (pointsText) {
-    pointsText.textContent = `${data.points} pts`;
-  }
-
-  // 🎯 Si completó el perfil por primera vez
-  if (completion >= 100 && data.bonus_just_awarded) {
-    queueToasts([
-      "🎉 ¡Has completado tu perfil al 100%!",
-      "Has ganado 20 puntos por completar tu perfil 👏",
-    ]);
-    if (progressModule) {
-      progressModule.style.transition = "opacity 0.8s ease, transform 0.8s ease, margin 0.8s ease";
-      progressModule.style.opacity = "0";
-      progressModule.style.transform = "translateY(-20px)";
-      progressModule.style.marginBottom = "0";
-      setTimeout(() => progressModule.remove(), 900);
-    }
-  }
-} else {
-  // ⚠️ Mostrar error
-  const errorMsg = result.data.message || "Error al guardar los datos.";
+if (!result.success) {
+  // 🚫 Si el backend devolvió un error (como teléfono duplicado)
+  const errorMsg = result.data?.message || "Error al guardar los datos.";
   gsToast(errorMsg, "error");
 
-  // 🚫 Si es error de campo (ej. teléfono duplicado)
-  if (result.data.field === "phone") {
+  // 🧭 Marcar visualmente el campo si aplica
+  if (result.data?.field === "phone") {
     const phoneField = form.querySelector("input[name='phone']");
     if (phoneField) {
-      phoneField.value = ""; // limpiar campo
       phoneField.focus();
       phoneField.classList.add("border-red-400");
       setTimeout(() => phoneField.classList.remove("border-red-400"), 2500);
     }
+  }
 
-    // ❌ No actualizar progreso ni puntos
-    return;
+  // 🚫 No continuar con el flujo de éxito
+  return;
+}
+
+// ✅ Si el resultado fue exitoso
+const data = result.data;
+const completion = data.completion || 0;
+
+// ✅ Mostrar mensaje base solo si no completó el perfil al 100 %
+if (!(completion >= 100 && data.bonus_just_awarded)) {
+  gsToast("Cambios guardados correctamente.", "success");
+}
+
+// 🔄 Actualizar barra de progreso
+if (progressBar && completionText) {
+  progressBar.style.width = `${completion}%`;
+  completionText.textContent = `${completion}%`;
+
+  progressBar.className =
+    "h-3 transition-all duration-500 " +
+    (completion < 50
+      ? "bg-red-400"
+      : completion < 80
+      ? "bg-yellow-400"
+      : "bg-green-500");
+}
+
+// 🔢 Actualizar puntos
+if (pointsText) {
+  pointsText.textContent = `${data.points} pts`;
+}
+
+// 🎯 Si completó el perfil por primera vez
+if (completion >= 100 && data.bonus_just_awarded) {
+  queueToasts([
+    "Has ganado 20 puntos por completar tu perfil 👏",
+  ]);
+
+  if (progressModule) {
+    progressModule.style.transition =
+      "opacity 0.8s ease, transform 0.8s ease, margin 0.8s ease";
+    progressModule.style.opacity = "0";
+    progressModule.style.transform = "translateY(-20px)";
+    progressModule.style.marginBottom = "0";
+    setTimeout(() => progressModule.remove(), 900);
   }
 }
 
@@ -165,12 +169,16 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /******************************************************
- * 📸 CAMBIO DE FOTO DE PERFIL
+ * 📸 CAMBIO DE FOTO DE PERFIL (actualizado)
  ******************************************************/
 document.addEventListener("DOMContentLoaded", () => {
   const changeBtn = document.querySelector("#gs-change-avatar-btn");
   const inputFile = document.querySelector("#gs-avatar-input");
   const avatarImg = document.querySelector("#gs-user-avatar");
+  const progressBar = document.querySelector("#gs-profile-progress-bar");
+  const completionText = document.querySelector("#gs-profile-completion-text");
+  const pointsText = document.querySelector("#gs-profile-points");
+  const progressModule = document.querySelector("#gs-profile-progress-module");
 
   if (!changeBtn || !inputFile || !avatarImg) return;
 
@@ -194,12 +202,49 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await res.json();
 
       if (result.success) {
-        gsToast(result.data.message, "success");
-        if (result.data.bonus_just_awarded) {
-          setTimeout(() => gsToast("🎉 Has ganado +5 puntos por cambiar tu foto 👏", "success"), 1000);
+        const data = result.data;
+
+        // ✅ Mostrar mensaje de éxito principal
+        gsToast(data.message, "success");
+
+        // 🔄 Actualizar barra de progreso si viene el porcentaje
+        if (progressBar && data.completion !== undefined) {
+          const completion = data.completion;
+          progressBar.style.width = `${completion}%`;
+          completionText.textContent = `${completion}%`;
+
+          progressBar.className =
+            "h-3 transition-all duration-500 " +
+            (completion < 50
+              ? "bg-red-400"
+              : completion < 80
+              ? "bg-yellow-400"
+              : "bg-green-500");
+
+          // 🎯 Si completó el perfil al 100 %, mostrar toasts y ocultar barra
+          if (completion >= 100 && data.bonus_just_awarded) {
+            queueToasts([
+              "🎉 ¡Has completado tu perfil al 100%! ",
+              "Has ganado 20 puntos por completar tu perfil 👏",
+            ]);
+
+            if (progressModule) {
+              progressModule.style.transition =
+                "opacity 0.8s ease, transform 0.8s ease, margin 0.8s ease";
+              progressModule.style.opacity = "0";
+              progressModule.style.transform = "translateY(-20px)";
+              progressModule.style.marginBottom = "0";
+              setTimeout(() => progressModule.remove(), 900);
+            }
+          }
+        }
+
+        // 🔢 Actualizar puntos si viene incluido
+        if (pointsText && data.points !== undefined) {
+          pointsText.textContent = `${data.points} pts`;
         }
       } else {
-        gsToast(result.data.message || "Error al actualizar la foto.", "error");
+        gsToast(result.data?.message || "Error al actualizar la foto.", "error");
       }
     } catch (err) {
       console.error("❌ Error al subir foto:", err);
@@ -207,6 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
 
 /******************************************************
  * 👠 PERFIL DE MODELO – GUARDADO AJAX
@@ -259,9 +305,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // 🎯 Si completó el perfil por primera vez
         if (data.bonus_just_awarded) {
           queueToasts([
-            "🎉 ¡Has completado tu perfil de modelo al 100%! ",
-            "Has ganado 30 puntos por completar tu perfil 👏",
-          ]);
+          "🎉 ¡Has completado tu perfil al 100%! ",
+          "Has ganado 20 puntos por completar tu perfil 👏",
+        ]);
         }
 
       } else {
@@ -272,10 +318,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if (result.data?.field === "phone") {
           const phoneField = form.querySelector("input[name='phone']");
           if (phoneField) {
-            phoneField.value = "";
             phoneField.focus();
             phoneField.classList.add("border-red-400");
-            setTimeout(() => phoneField.classList.remove("border-red-400"), 2500);
+
+            // 🔹 Reactivar el botón de guardar para permitir corregir y reenviar
+            saveBtn.disabled = false;
+            saveBtn.classList.remove("opacity-60", "cursor-not-allowed");
+
+            // 🔹 Escuchar cuando el usuario empiece a corregir el número
+            phoneField.addEventListener(
+              "input",
+              () => {
+                phoneField.classList.remove("border-red-400");
+              },
+              { once: true }
+            );
           }
         }
       }

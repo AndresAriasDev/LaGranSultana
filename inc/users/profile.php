@@ -1,16 +1,17 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if (!defined('ABSPATH')) exit;
 
 /**
  * ========================================================
  * 🎯 PERFIL DE USUARIO NORMAL – La Gran Sultana
- * Archivo central para manejar:
+ * --------------------------------------------------------
+ * Maneja:
  *  - Guardado de información personal (AJAX)
  *  - Cálculo del progreso del perfil
  *  - Interacción con el sistema global de puntos
  * ========================================================
  */
-/*******************************************************/
+
 /* ========================================================
  * 1️⃣ GUARDAR INFORMACIÓN DEL PERFIL (AJAX)
  * ======================================================== */
@@ -23,52 +24,70 @@ function gs_save_user_profile() {
         wp_send_json_error(['message' => 'No hay sesión activa.']);
     }
 
-    $fields = ['first_name','last_name','phone','address','department','birthdate','gender'];
-    
-// ✅ Validar teléfono duplicado antes de guardar
-if (isset($_POST['phone'])) {
     global $wpdb;
-    $phone = sanitize_text_field($_POST['phone']);
-    if (!empty($phone)) {
+
+    // 🧩 Campos básicos del formulario (sin incluir phone aquí)
+    $fields = ['first_name','address','department','birthdate','gender'];
+
+    /* ========================================================
+     * ✅ VALIDAR Y GUARDAR TELÉFONO (único y normalizado)
+     * ======================================================== */
+    if (isset($_POST['phone'])) {
+        $raw_phone = sanitize_text_field($_POST['phone']);
+
+        // Normalizar: quitar todo excepto + y dígitos
+        $normalized = preg_replace('/[^\d\+]/', '', $raw_phone);
+
+        // Si no tiene + al inicio, asumimos +505
+        if (strpos($normalized, '+') !== 0) {
+            $normalized = '+505' . $normalized;
+        }
+
+        // Limpieza final (sin espacios ni guiones)
+        $normalized_clean = preg_replace('/[^\d\+]/', '', $normalized);
+
+        // Buscar si existe en otro usuario
         $exists = $wpdb->get_var($wpdb->prepare(
-            "SELECT user_id FROM {$wpdb->usermeta} 
+            "SELECT user_id 
+             FROM {$wpdb->usermeta} 
              WHERE meta_key = 'phone' 
-             AND meta_value = %s 
+             AND REPLACE(REPLACE(REPLACE(REPLACE(meta_value, ' ', ''), '-', ''), '(', ''), ')', '') = REPLACE(REPLACE(REPLACE(REPLACE(%s, ' ', ''), '-', ''), '(', ''), ')', '')
              AND user_id != %d",
-            $phone, $user_id
+            $normalized_clean,
+            $user_id
         ));
 
         if ($exists) {
-            // 🚫 Detener inmediatamente la ejecución y devolver error
             wp_send_json_error([
                 'message' => 'El número de teléfono ingresado ya está registrado en otra cuenta.',
                 'field'   => 'phone'
             ]);
-            exit;
+        }
+
+        // ✅ Guardar el número normalizado solo si no está duplicado
+        update_user_meta($user_id, 'phone', $normalized_clean);
+    }
+
+    /* ========================================================
+     * ✅ GUARDAR LOS DEMÁS CAMPOS
+     * ======================================================== */
+    foreach ($fields as $field) {
+        if (isset($_POST[$field])) {
+            update_user_meta($user_id, $field, sanitize_text_field($_POST[$field]));
         }
     }
-}
 
-
-// ✅ Si todo está correcto, proceder con la actualización normal
-foreach ($fields as $field) {
-    if (isset($_POST[$field])) {
-        update_user_meta($user_id, $field, sanitize_text_field($_POST[$field]));
-    }
-}
-
-
-    // Calcular progreso del perfil
+    /* ========================================================
+     * 📊 CALCULAR PROGRESO Y OTORGAR PUNTOS
+     * ======================================================== */
     $profile_data = gs_get_profile_completion($user_id);
     $completion   = $profile_data['percentage'];
     $missing      = $profile_data['missing'];
 
-    // Verificar si ya tenía puntos antes
     $already_awarded = get_user_meta($user_id, 'gs_profile_bonus_awarded', true);
     $bonus_just_awarded = false;
 
-    // Si acaba de completar al 100% por primera vez → dar puntos
-    if ($completion >= 100 && ! $already_awarded) {
+    if ($completion >= 100 && !$already_awarded) {
         gs_add_points($user_id, 20, 'Perfil completo', 'profile_complete');
         update_user_meta($user_id, 'gs_profile_bonus_awarded', 1);
         $bonus_just_awarded = true;
@@ -84,13 +103,12 @@ foreach ($fields as $field) {
     ]);
 }
 
-
 /* ========================================================
  * 2️⃣ CALCULAR EL PORCENTAJE DE PERFIL COMPLETADO
  * ======================================================== */
 function gs_get_profile_completion($user_id) {
     $fields = [
-        'first_name'  => 'Nombre',
+        'first_name'  => 'Nombre completo',
         'phone'       => 'Teléfono',
         'address'     => 'Dirección',
         'department'  => 'Departamento',
@@ -110,9 +128,9 @@ function gs_get_profile_completion($user_id) {
         }
     }
 
-    // ✅ Verificar foto de perfil (no Gravatar por defecto)
-    $avatar_url = get_avatar_url($user_id);
-    if ($avatar_url && strpos($avatar_url, 'gravatar.com/avatar/?d=') === false) {
+    // ✅ Verificar foto de perfil (no gravatar por defecto)
+    $avatar_url = get_user_meta($user_id, 'gs_profile_picture', true);
+    if (!empty($avatar_url)) {
         $filled++;
     } else {
         $missing[] = 'Foto de perfil';
@@ -166,22 +184,31 @@ function gs_upload_profile_picture() {
     $previous_avatar = get_user_meta($user_id, 'gs_profile_picture', true);
     update_user_meta($user_id, 'gs_profile_picture', esc_url($new_avatar_url));
 
-    // 🎯 Asignar puntos solo si es la primera vez
-    $already_awarded = get_user_meta($user_id, 'gs_profile_picture_awarded', true);
-    $bonus_just_awarded = false;
+    // ✅ Solo actualizamos la foto; el bono se otorga cuando complete el perfil
+        $bonus_just_awarded = false;
 
-    if (empty($previous_avatar) && ! $already_awarded) {
-        gs_add_points($user_id, 5, 'Cambio de foto de perfil', 'profile_picture');
-        update_user_meta($user_id, 'gs_profile_picture_awarded', 1);
-        $bonus_just_awarded = true;
-    }
 
-    wp_send_json_success([
-        'message' => $bonus_just_awarded 
-            ? 'Foto actualizada y +5 puntos ganados 👏' 
-            : 'Foto actualizada correctamente.',
-        'avatar_url' => esc_url($new_avatar_url),
-        'bonus_just_awarded' => $bonus_just_awarded,
-        'points' => gs_get_user_points($user_id)
-    ]);
+// 📊 Recalcular progreso general
+$profile_data = gs_get_profile_completion($user_id);
+$completion   = $profile_data['percentage'];
+
+// ⚡ Comprobar si justo ahora completó todo
+$bonus_just_awarded = false;
+$already_awarded = get_user_meta($user_id, 'gs_profile_bonus_awarded', true);
+if ($completion >= 100 && !$already_awarded) {
+    gs_add_points($user_id, 20, 'Perfil completo', 'profile_complete');
+    update_user_meta($user_id, 'gs_profile_bonus_awarded', 1);
+    $bonus_just_awarded = true;
+}
+
+wp_send_json_success([
+    'message' => $bonus_just_awarded 
+        ? '🎉 ¡Has completado tu perfil al 100% y ganado 20 puntos!' 
+        : 'Foto actualizada correctamente.',
+    'avatar_url' => esc_url($new_avatar_url),
+    'bonus_just_awarded' => $bonus_just_awarded,
+    'points' => gs_get_user_points($user_id),
+    'completion' => $completion
+]);
+
 }
