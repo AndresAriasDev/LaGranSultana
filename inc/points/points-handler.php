@@ -22,6 +22,44 @@ if ( ! function_exists('gs_get_user_points') ) {
 }
 
 /******************************************************
+ * 🔹 Sumar puntos al usuario por foto subida (AJAX)
+ ******************************************************/
+add_action('wp_ajax_sumar_puntos_modelo', 'gs_sumar_puntos_modelo');
+add_action('wp_ajax_nopriv_sumar_puntos_modelo', 'gs_sumar_puntos_modelo');
+
+function gs_sumar_puntos_modelo() {
+    // Validar usuario
+    if ( ! is_user_logged_in() ) {
+        wp_send_json_error(['message' => 'Usuario no autenticado.']);
+    }
+
+    $user_id = get_current_user_id();
+    $puntos  = intval($_POST['puntos'] ?? 0);
+
+    if ($puntos <= 0) {
+        wp_send_json_error(['message' => 'Cantidad de puntos inválida.']);
+    }
+
+    // ⚙️ Registrar puntos con el sistema central
+    $nuevo_total = gs_add_points(
+        $user_id,
+        $puntos,
+        'Subida de nueva foto al perfil de modelo',
+        'upload_photo_' . time() // unique key basada en timestamp
+    );
+
+    if ( ! $nuevo_total ) {
+        wp_send_json_error(['message' => 'Los puntos ya fueron otorgados o no se pudieron sumar.']);
+    }
+
+    wp_send_json_success([
+        'message'      => 'Puntos sumados correctamente.',
+        'nuevo_total'  => $nuevo_total
+    ]);
+}
+
+
+/******************************************************
  * 🔹 Sumar puntos al usuario
  ******************************************************/
 if ( ! function_exists('gs_add_points') ) {

@@ -23,6 +23,8 @@ add_action('wp_body_open', function () {
             <?php get_template_part('template-parts/modals/puntos-perfil-info'); ?>
              <!-- 🧠 Contenido dinámico (directo) -->
             <?php get_template_part('template-parts/modals/puntos-recompensa-info'); ?>
+            <?php get_template_part('template-parts/modals/subida-foto-info'); ?>
+
         </div>
     </div>
     <?php

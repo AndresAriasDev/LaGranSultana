@@ -49,6 +49,8 @@ require_once get_template_directory() . '/inc/cpt/cpt-modelos.php';     // CPT M
 require_once get_template_directory() . '/inc/cpt/cpt-fotos.php';       // CPT Fotos
 require_once get_template_directory() . '/inc/roles/rol-modelo.php';    // Lógica específica del rol Modelo
 require_once get_template_directory() . '/inc/auth/modal.php';
+require_once get_template_directory() . '/inc/ajax/upload-foto.php';
+require_once get_template_directory() . '/inc/ajax/delete-foto.php';
 require_once get_template_directory() . '/inc/modals/info-modal.php';
 require_once get_template_directory() . '/inc/shortcodes/register.php';
 require_once get_template_directory() . '/inc/shortcodes/login.php';
@@ -135,6 +137,44 @@ wp_localize_script('gs-user-profile', 'gsProfile', array(
   'nonce'   => wp_create_nonce('gs_profile_nonce')
 ));
 
+//////////////////////////////
+
+add_action('wp_enqueue_scripts', 'gs_enqueue_scripts_condicionales');
+function gs_enqueue_scripts_condicionales() {
+
+    // Obtener la URL actual
+    $current_url = home_url(add_query_arg(array(), $GLOBALS['wp']->request));
+
+    // Cargar script en la galería privada del modelo (panel)
+    if (isset($_GET['view']) && $_GET['view'] === 'galeria' && strpos($current_url, 'mi-cuenta') !== false) {
+        gs_enqueue_model_gallery_script();
+        return;
+    }
+
+    // Cargar script en las páginas del CPT "fotos"
+    if (is_singular('fotos')) {
+        gs_enqueue_model_gallery_script();
+        return;
+    }
+}
+
+/**
+ * Función auxiliar que encola y localiza el script de la galería
+ */
+function gs_enqueue_model_gallery_script() {
+    wp_enqueue_script(
+        'model-gallery',
+        get_template_directory_uri() . '/assets/js/model-gallery.js',
+        array('jquery'),
+        '1.0.0',
+        true
+    );
+
+    wp_localize_script('model-gallery', 'ajaxurl', admin_url('admin-ajax.php'));
+}
+
+
+/////////////////////////////
 
 wp_enqueue_script('flatpickr', 'https://cdn.jsdelivr.net/npm/flatpickr', [], null, true);
 wp_enqueue_style('flatpickr-css', 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css');
