@@ -174,6 +174,61 @@ function gs_enqueue_model_gallery_script() {
     wp_localize_script('model-gallery', 'ajaxurl', admin_url('admin-ajax.php'));
 }
 
+/******************************************************
+ * 📸 SISTEMA DE TAMAÑOS DE IMAGEN - LA GRAN SULTANA
+ * ----------------------------------------------------
+ * Este bloque define tamaños personalizados y calidad
+ * de compresión optimizada para las imágenes del sitio.
+ * ----------------------------------------------------
+ *  - modelo_panel → Galería del modelo (panel privado)
+ *  - full → Perfil público (máxima calidad)
+ ******************************************************/
+
+add_action('after_setup_theme', function () {
+    /**
+     * 📷 Tamaño intermedio para las fotos del panel del modelo
+     * 600x600 px con recorte exacto (crop = true)
+     * Ideal balance entre nitidez y rendimiento (~80–100 KB)
+     */
+    add_image_size('modelo_panel', 600, 600, true);
+
+    /**
+     * 📷 Tamaño de miniatura cuadrado pequeño (si lo necesitas más adelante)
+     * 300x300 px (similar a 'medium', pero crop cuadrado exacto)
+     */
+    add_image_size('modelo_thumb', 300, 300, true);
+});
+
+
+/******************************************************
+ * 🧠 FILTRO DE COMPRESIÓN JPEG
+ * Aumenta ligeramente la calidad de compresión solo
+ * para las imágenes 'modelo_panel' y 'modelo_thumb'.
+ * Mantiene la configuración global del resto igual.
+ ******************************************************/
+add_filter('jpeg_quality', function ($quality, $context) {
+    // Mejor calidad para imágenes del panel del modelo
+    if (in_array($context, ['modelo_panel', 'modelo_thumb'])) {
+        return 90; // valor entre 0 y 100 (default WP ~82)
+    }
+    return $quality;
+}, 10, 2);
+
+
+/******************************************************
+ * 🧰 FUNCIÓN AUXILIAR (opcional)
+ * Permite obtener una URL de imagen segura en el tamaño deseado.
+ * Si no existe la versión optimizada, devuelve la original.
+ ******************************************************/
+if (!function_exists('gs_get_model_image')) {
+    function gs_get_model_image($post_id, $size = 'modelo_panel') {
+        $url = get_the_post_thumbnail_url($post_id, $size);
+        if (!$url) {
+            $url = get_the_post_thumbnail_url($post_id, 'full');
+        }
+        return esc_url($url);
+    }
+}
 
 /////////////////////////////
 

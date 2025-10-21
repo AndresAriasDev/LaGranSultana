@@ -72,10 +72,6 @@ $fotos = get_posts([
 <div id="galeria-fotos"
      data-current="1"
      class="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-    <!-- Loader inicial -->
-    <div id="galeria-loader" class="absolute inset-0 flex items-center justify-center bg-white/70">
-        <div class="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-    </div>
   </div>
 
   <!-- 🔹 Paginación -->
