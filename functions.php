@@ -51,6 +51,7 @@ require_once get_template_directory() . '/inc/roles/rol-modelo.php';    // Lógi
 require_once get_template_directory() . '/inc/auth/modal.php';
 require_once get_template_directory() . '/inc/ajax/upload-foto.php';
 require_once get_template_directory() . '/inc/ajax/delete-foto.php';
+require_once get_template_directory() . '/inc/ajax/gallery-pagination.php';
 require_once get_template_directory() . '/inc/modals/info-modal.php';
 require_once get_template_directory() . '/inc/shortcodes/register.php';
 require_once get_template_directory() . '/inc/shortcodes/login.php';

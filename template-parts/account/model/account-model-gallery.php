@@ -67,36 +67,18 @@ $fotos = get_posts([
     </div>
 </div>
 
-<section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 transition-all">
-<div id="galeria-fotos" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-  <?php foreach ($fotos as $foto): ?>
-    <div class="relative group overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300">
-
-      <!-- Contenedor cuadrado -->
-      <div class="aspect-square w-full h-auto relative overflow-hidden rounded-2xl">
-        <?php echo get_the_post_thumbnail($foto->ID, 'medium', [
-          'class' => 'w-full h-full object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500 ease-out'
-        ]); ?>
-
-        <!-- Overlay de Likes -->
-        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center">
-          <p class="text-white text-lg font-semibold tracking-wide">
-          <?php echo rand(200, 1800); ?> <span class="text-sm font-normal ml-1">Likes</span>
-          </p>
-        </div>
-
-        <!-- Botón eliminar -->
-        <button 
-          class="delete-foto absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-110 cursor-pointer" 
-          data-id="<?php echo $foto->ID; ?>"
-          title="Eliminar esta foto"
-        >
-          <img src="/wp-content/uploads/2025/10/basura-blanco.png" alt="Eliminar" class="w-6 h-6">
-        </button>
-      </div>
-
+<section class=" rounded-2xl transition-all">
+  <!-- 🖼️ Galería (inicialmente vacía, se llena por AJAX) -->
+<div id="galeria-fotos"
+     data-current="1"
+     class="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+    <!-- Loader inicial -->
+    <div id="galeria-loader" class="absolute inset-0 flex items-center justify-center bg-white/70">
+        <div class="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
     </div>
-  <?php endforeach; ?>
-</div>
+  </div>
 
+  <!-- 🔹 Paginación -->
+  <div id="galeria-paginacion" class="flex justify-center mt-8 space-x-2"></div>
 </section>
+

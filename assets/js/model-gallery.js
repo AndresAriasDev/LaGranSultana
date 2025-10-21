@@ -174,3 +174,129 @@ document.addEventListener("click", (e) => {
     }
   });
 });
+
+/********/
+
+/******************************************************
+ * 📸 PAGINACIÓN DE GALERÍA AJAX
+ ******************************************************/
+document.addEventListener("DOMContentLoaded", () => {
+  const galeria = document.getElementById("galeria-fotos");
+  const paginacion = document.getElementById("galeria-paginacion");
+  if (!galeria || !paginacion) return;
+
+  // ⚙️ Configuración inicial
+  let currentPage = 1;
+  const perPage = 8;
+
+  // 🚀 Inicializar al cargar
+  inicializarPaginacion();
+
+  /******************************************************
+   * 🔹 Cargar fotos por página vía AJAX
+   ******************************************************/
+  async function cargarFotos(page = 1) {
+    const formData = new FormData();
+    formData.append("action", "get_modelo_fotos");
+    formData.append("page", page);
+
+    try {
+      // Mostrar animación de carga
+      galeria.style.opacity = "0.3";
+      galeria.style.pointerEvents = "none";
+
+      const response = await fetch(ajaxurl, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!data.success) throw new Error("Error al obtener las fotos");
+
+      // Reemplazar el contenido del grid
+      galeria.innerHTML = data.data.html;
+
+      // Actualizar paginación
+      generarPaginacion(data.data.total_pages, data.data.current_page);
+
+      // Animación suave
+      galeria.style.opacity = "1";
+      galeria.style.pointerEvents = "auto";
+      galeria.classList.add("transition-opacity", "duration-300");
+
+      currentPage = data.data.current_page;
+    } catch (err) {
+      console.error("❌ Error cargando fotos:", err);
+      galeria.innerHTML = `<p class="col-span-full text-center text-red-500 py-8">Error al cargar las fotos.</p>`;
+    }
+  }
+
+  /******************************************************
+   * 🔹 Generar botones de paginación
+   ******************************************************/
+  function generarPaginacion(totalPages, activePage) {
+    paginacion.innerHTML = "";
+
+    if (totalPages <= 1) return; // no mostrar si solo hay una página
+
+    const createButton = (num) => {
+      const btn = document.createElement("button");
+      btn.textContent = num;
+      btn.className =
+        "px-3 py-1 rounded-md border border-gray-300 text-sm font-medium transition " +
+        (num === activePage
+          ? "bg-blue-600 text-white shadow-sm"
+          : "hover:bg-gray-100 text-gray-700");
+      btn.dataset.page = num;
+      return btn;
+    };
+
+    // Flecha atrás
+    if (activePage > 1) {
+      const prev = document.createElement("button");
+      prev.innerHTML = "←";
+      prev.className =
+        "px-3 py-1 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-100";
+      prev.dataset.page = activePage - 1;
+      paginacion.appendChild(prev);
+    }
+
+    // Botones numéricos
+    for (let i = 1; i <= totalPages; i++) {
+      paginacion.appendChild(createButton(i));
+    }
+
+    // Flecha adelante
+    if (activePage < totalPages) {
+      const next = document.createElement("button");
+      next.innerHTML = "→";
+      next.className =
+        "px-3 py-1 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-100";
+      next.dataset.page = activePage + 1;
+      paginacion.appendChild(next);
+    }
+  }
+
+  /******************************************************
+   * 🔹 Escuchar clics en botones de paginación
+   ******************************************************/
+  paginacion.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-page]");
+    if (!btn) return;
+
+    const newPage = parseInt(btn.dataset.page);
+    if (newPage === currentPage) return;
+
+    cargarFotos(newPage);
+    document.getElementById("galeria-loader")?.classList.add("hidden");
+    window.scrollTo({ top: galeria.offsetTop - 100, behavior: "smooth" });
+  });
+
+  /******************************************************
+   * 🔹 Inicializar al cargar
+   ******************************************************/
+  function inicializarPaginacion() {
+    // Pedimos total inicial (página 1)
+    cargarFotos(1);
+  }
+});
