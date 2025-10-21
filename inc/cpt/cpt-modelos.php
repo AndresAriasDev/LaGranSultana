@@ -22,7 +22,7 @@ function gran_sultana_register_cpt_modelos() {
     $args = array(
         'labels'             => $labels,
         'public'             => true,
-        'has_archive'        => true,
+        'has_archive'        => false,
         'rewrite'            => array('slug' => 'modelo'),
         'menu_icon'          => 'dashicons-admin-users',
         'supports'           => array('title','editor','thumbnail'),
@@ -31,6 +31,6 @@ function gran_sultana_register_cpt_modelos() {
         'map_meta_cap'       => true,
     );
 
-    register_post_type( 'modelos', $args );
+    register_post_type( 'modelo', $args );
 }
 add_action( 'init', 'gran_sultana_register_cpt_modelos' );

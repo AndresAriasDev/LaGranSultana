@@ -45,12 +45,21 @@ add_action('after_setup_theme', function() {
  * Incluir archivos modulares
  */
 require_once get_template_directory() . '/inc/roles/roles.php';               // Roles personalizados base
-require_once get_template_directory() . '/inc/cpt/cpt-modelos.php';     // CPT Modelos
+require_once get_template_directory() . '/inc/cpt/cpt-modelos.php';
+    // CPT Modelos
 require_once get_template_directory() . '/inc/cpt/cpt-fotos.php';       // CPT Fotos
 require_once get_template_directory() . '/inc/roles/rol-modelo.php';    // Lógica específica del rol Modelo
 require_once get_template_directory() . '/inc/auth/modal.php';
 require_once get_template_directory() . '/inc/ajax/upload-foto.php';
 require_once get_template_directory() . '/inc/ajax/delete-foto.php';
+/**
+ * Incluir endpoints AJAX del perfil público del modelo
+ */
+require_once get_template_directory() . '/inc/ajax/model-follow.php';
+require_once get_template_directory() . '/inc/ajax/model-like.php';
+require_once get_template_directory() . '/inc/ajax/model-views.php';
+require_once get_template_directory() . '/inc/ajax/model-gallery-pagination.php';
+
 require_once get_template_directory() . '/inc/ajax/gallery-pagination.php';
 require_once get_template_directory() . '/inc/modals/info-modal.php';
 require_once get_template_directory() . '/inc/shortcodes/register.php';
@@ -91,6 +100,19 @@ add_action('after_setup_theme', function () {
         }
     }
 });
+/**
+ * Forzar plantilla pública del modelo
+ */
+function lgs_load_model_template($template) {
+    if (is_singular('modelo')) {
+        $new_template = locate_template(array('/template-parts/model/public-model-profile.php'));
+        if (!empty($new_template)) {
+            return $new_template;
+        }
+    }
+    return $template;
+}
+add_filter('single_template', 'lgs_load_model_template');
 
 /***************/
 
@@ -229,6 +251,27 @@ if (!function_exists('gs_get_model_image')) {
         return esc_url($url);
     }
 }
+
+
+/**
+ * Encolar JS del perfil público del modelo
+ */
+function lgs_enqueue_public_model_scripts() {
+    if (is_page_template('template-parts/model/public-model-profile.php') || is_singular('modelo')) {
+        // Encolar el JS
+        wp_enqueue_script(
+            'public-model-profile',
+            get_template_directory_uri() . '/assets/js/public-model-profile.js',
+            array('jquery'),
+            '1.0',
+            true
+        );
+
+        // Enviar variables PHP al JS
+        wp_localize_script('public-model-profile', 'ajaxurl', admin_url('admin-ajax.php'));
+    }
+}
+add_action('wp_enqueue_scripts', 'lgs_enqueue_public_model_scripts');
 
 /////////////////////////////
 
