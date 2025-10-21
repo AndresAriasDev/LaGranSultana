@@ -24,7 +24,7 @@ add_action('wp_body_open', function () {
              <!-- 🧠 Contenido dinámico (directo) -->
             <?php get_template_part('template-parts/modals/puntos-recompensa-info'); ?>
             <?php get_template_part('template-parts/modals/subida-foto-info'); ?>
-
+            <?php get_template_part('template-parts/modals/confirmar-eliminar-foto'); ?>
         </div>
     </div>
     <?php

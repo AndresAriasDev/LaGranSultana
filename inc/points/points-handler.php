@@ -104,6 +104,34 @@ if ( ! function_exists('gs_remove_points') ) {
 }
 
 /******************************************************
+ * 🚫 Penalización: restar puntos por eliminar una foto
+ ******************************************************/
+add_action('wp_ajax_restar_puntos_por_eliminar_foto', 'gs_restar_puntos_por_eliminar_foto');
+function gs_restar_puntos_por_eliminar_foto() {
+    $user_id = get_current_user_id();
+    if (!$user_id) wp_send_json_error(['message' => 'No autorizado']);
+
+    $penalizacion = 20;
+    $puntos_actuales = gs_get_user_points($user_id);
+    $nuevo_total = max(0, $puntos_actuales - $penalizacion);
+
+    // Actualizar puntos del usuario
+    update_user_meta($user_id, 'gs_points', $nuevo_total);
+
+    // Registrar en el historial (opcional pero recomendable)
+    gs_log_points_event($user_id, $penalizacion, 'Eliminó una foto', 'remove');
+
+    // Enviar respuesta
+    wp_send_json_success([
+        'message' => 'Puntos restados correctamente.',
+        'restados' => $penalizacion,
+        'nuevo_total' => $nuevo_total
+    ]);
+}
+
+
+
+/******************************************************
  * 🔹 Verificar si un usuario ya recibió puntos por un evento
  ******************************************************/
 if ( ! function_exists('gs_has_received_points') ) {

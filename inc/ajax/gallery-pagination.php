@@ -98,3 +98,57 @@ if ($fotos && count($fotos) > 0) : ?>
         'current_page' => $paged,
     ]);
 }
+
+/******************************************************
+ * 🔹 AJAX: Obtener una foto siguiente (para rellenar galería)
+ ******************************************************/
+add_action('wp_ajax_get_next_model_photo', 'gs_get_next_model_photo');
+function gs_get_next_model_photo() {
+    if (!is_user_logged_in()) wp_send_json_error(['message' => 'No autorizado']);
+
+    $user_id = get_current_user_id();
+    $offset  = intval($_POST['offset'] ?? 0);
+
+    // Obtener solo UNA foto después del offset actual
+    $foto = get_posts([
+        'post_type'      => 'fotos',
+        'meta_key'       => '_modelo_relacionado',
+        'meta_value'     => $user_id,
+        'posts_per_page' => 1,
+        'offset'         => $offset,
+    ]);
+
+    if (!$foto) {
+        wp_send_json_error(['message' => 'No hay más fotos disponibles.']);
+    }
+
+    $foto = $foto[0];
+
+    ob_start(); ?>
+        <div class="relative group overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300">
+          <div class="aspect-square w-full h-auto relative overflow-hidden rounded-2xl bg-gray-100 animate-pulse">
+            <img loading="lazy"
+                 src="<?php echo esc_url(gs_get_model_image($foto->ID, 'modelo_panel')); ?>"
+                 alt=""
+                 class="w-full h-full object-cover rounded-2xl opacity-0 transition-opacity duration-500 ease-out"
+                 onload="this.classList.remove('opacity-0','animate-pulse'); this.parentElement.classList.remove('animate-pulse','bg-gray-100');" />
+            <div class="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+              <div class="rounded-xl px-6 py-4 text-center transform scale-95 group-hover:scale-100 transition-transform duration-300 ease-out">
+                <p class="text-[var(--color-blanco-pr)] text-4xl font-bold leading-tight tracking-wide">
+                  <?php echo rand(200, 1800); ?>
+                </p>
+                <p class="text-[var(--color-blanco-pr)] text-sm uppercase tracking-wider mt-1 opacity-90">Likes</p>
+              </div>
+            </div>
+            <button class="delete-foto absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-110 cursor-pointer bg-[var(--color-rojo-pr)] rounded-lg p-2"
+                    data-id="<?php echo $foto->ID; ?>"
+                    title="Eliminar esta foto">
+              <img src="/wp-content/uploads/2025/10/basura-blanco.png" alt="Eliminar" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+    <?php
+    $html = ob_get_clean();
+
+    wp_send_json_success(['html' => $html]);
+}

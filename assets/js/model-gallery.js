@@ -189,51 +189,134 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /******************************************************
-   * 🗑️ Eliminar foto
-   ******************************************************/
-  document.addEventListener("click", async (e) => {
-    const btn = e.target.closest(".delete-foto");
-    if (!btn) return;
+/******************************************************
+ * 🗑️ ELIMINAR FOTO (con modal y penalización)
+ ******************************************************/
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".delete-foto");
+  if (!btn) return;
 
-    const fotoId = btn.dataset.id;
-    if (!fotoId) return;
+  // Guardamos el ID de la foto seleccionada
+  const fotoId = btn.dataset.id;
+  if (!fotoId) return;
+  window.fotoAEliminar = fotoId;
 
-    if (!confirm("¿Seguro que quieres eliminar esta foto?")) return;
+  // Mostrar modal de confirmación
+  const overlay = document.getElementById("gs-info-overlay");
+  const modal = document.getElementById("gs-info-modal");
+  const inner = document.getElementById("gs-info-inner");
+  const target = document.getElementById("gs-info-eliminar-foto");
 
-    const formData = new FormData();
-    formData.append("action", "eliminar_foto_modelo");
-    formData.append("foto_id", fotoId);
+  if (overlay && modal && inner && target) {
+    overlay.classList.remove("hidden");
+    modal.classList.remove("hidden");
+    document.body.classList.add("overflow-hidden");
 
-    try {
-      const response = await fetch(ajaxurl, { method: "POST", body: formData });
-      const data = await response.json();
+    // Reiniciar animación "wiggle"
+    target.classList.remove("animate-[wiggle_0.3s_ease-in-out]");
+    void target.offsetWidth; // ⚡ Forzar reflow
+    target.classList.add("animate-[wiggle_0.3s_ease-in-out]");
 
-      if (data.success) {
-        const fotoDiv = btn.closest(".group");
+    requestAnimationFrame(() => {
+      overlay.classList.add("opacity-100");
+      inner.classList.remove("opacity-0", "scale-95");
+      inner.classList.add("opacity-100", "scale-100");
+      target.classList.remove("hidden", "opacity-0");
+    });
+  }
+});
+
+// Confirmar eliminación
+document.getElementById("gs-confirmar-eliminar")?.addEventListener("click", async () => {
+  const fotoId = window.fotoAEliminar;
+  if (!fotoId) return;
+
+  // Cerrar modal
+  document.querySelectorAll("[data-close-info]").forEach((btn) => btn.click());
+
+  // 🔸 Eliminar foto
+  const formData = new FormData();
+  formData.append("action", "eliminar_foto_modelo");
+  formData.append("foto_id", fotoId);
+
+  try {
+    const response = await fetch(ajaxurl, { method: "POST", body: formData });
+    const data = await response.json();
+
+    if (data.success) {
+      // 🔄 Animación de salida visual
+      const fotoDiv = document.querySelector(`.delete-foto[data-id="${fotoId}"]`)?.closest(".group");
+      if (fotoDiv) {
         fotoDiv.style.transition = "opacity 0.3s ease, transform 0.3s ease";
         fotoDiv.style.opacity = "0";
         fotoDiv.style.transform = "scale(0.95)";
-        setTimeout(() => {
+        setTimeout(async () => {
           fotoDiv.remove();
 
-          // ⚙️ Recalcular página actual
-          const remaining = gallery.querySelectorAll(".group").length;
-          const currentPage = parseInt(gallery.dataset.current);
-          if (remaining === 0 && currentPage > 1) {
-            cargarFotos(currentPage - 1);
-          } else {
-            cargarFotos(currentPage);
+          // ⚙️ Después de eliminar, intentamos completar el hueco
+          const gallery = document.getElementById("galeria-fotos");
+          if (gallery) {
+            const totalActual = gallery.querySelectorAll(".group").length;
+            const offset = totalActual; // pedimos la siguiente según cantidad actual
+            const formNext = new FormData();
+            formNext.append("action", "get_next_model_photo");
+            formNext.append("offset", offset);
+
+            try {
+              const resNext = await fetch(ajaxurl, { method: "POST", body: formNext });
+              const nextData = await resNext.json();
+
+              if (nextData.success && nextData.data.html) {
+                // Crear contenedor temporal
+                const temp = document.createElement("div");
+                temp.innerHTML = nextData.data.html.trim();
+                const newPhoto = temp.firstElementChild;
+
+                // 🔹 Agregar animación de aparición suave
+                newPhoto.style.opacity = "0";
+                newPhoto.style.transform = "scale(0.92)";
+                newPhoto.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+
+                // Insertar al final de la galería
+                gallery.insertAdjacentElement("beforeend", newPhoto);
+
+                // Activar animación
+                requestAnimationFrame(() => {
+                  newPhoto.style.opacity = "1";
+                  newPhoto.style.transform = "scale(1)";
+                });
+              } else {
+                console.log("No hay más fotos para rellenar.");
+              }
+            } catch (err) {
+              console.error("❌ Error al intentar rellenar galería:", err);
+            }
           }
         }, 300);
-      } else {
-        alert("⚠️ " + (data.data?.message || "Error al eliminar la foto."));
       }
-    } catch (err) {
-      console.error("❌ Error al eliminar:", err);
-      alert("Error al eliminar la foto.");
+
+      // ⚖️ Penalizar puntos
+      const puntosData = new FormData();
+      puntosData.append("action", "restar_puntos_por_eliminar_foto");
+      const res = await fetch(ajaxurl, { method: "POST", body: puntosData });
+      const puntosResp = await res.json();
+
+      if (puntosResp.success) {
+        if (typeof gsToast === "function") {
+          gsToast("⚠️ Has perdido 20 puntos por eliminar una foto.", "warning");
+        } else {
+          alert("⚠️ Has perdido 20 puntos por eliminar una foto.");
+        }
+      }
+    } else {
+      alert("⚠️ " + (data.data?.message || "Error al eliminar la foto"));
     }
-  });
+  } catch (err) {
+    console.error("❌ Error al eliminar:", err);
+    alert("Error al eliminar la foto.");
+  }
+});
+
 
   /******************************************************
    * 🚀 Inicializar galería al cargar
