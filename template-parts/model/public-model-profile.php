@@ -50,56 +50,69 @@ $total_views = (int) get_post_meta($model_id, 'model_total_views', true);
 
 <main id="public-model-profile" class="bg-[var(--color-blanco-pr)] font-[var(--font-sans)]">
 
-  <!-- 🔹 PORTADA -->
-  <section class="relative w-full h-72 sm:h-80 md:h-96 overflow-hidden bg-[var(--color-blanco-bajo)]">
+  <!-- 🔹 PORTADA final ajustada (100% ancho, max 1200px contenido) -->
+  <section class="relative w-full h-[220px] sm:h-[200px]">
     <!-- Imagen de fondo -->
     <img src="<?php echo esc_url($profile_photo); ?>"
          alt="<?php echo esc_attr($display_name); ?>"
-         class="absolute inset-0 w-full h-full object-cover">
-    <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-transparent"></div>
+         class="absolute inset-0 w-full h-full object-cover brightness-90">
+    <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-transparent"></div>
 
-    <!-- Foto circular centrada -->
-    <div class="absolute bottom-[-64px] left-1/2 transform -translate-x-1/2">
-      <img src="<?php echo esc_url($profile_photo); ?>"
-           alt="<?php echo esc_attr($display_name); ?>"
-           class="w-32 h-32 rounded-full border-4 border-[var(--color-blanco-pr)] shadow-xl object-cover">
-    </div>
-  </section>
+    <!-- Contenedor interno limitado -->
+    <div class="relative h-full max-w-[1200px] mx-auto">
 
-  <div class="h-24"></div>
-
-  <!-- 👤 Información principal -->
-  <section class="flex flex-col items-center text-center">
-    <h1 class="text-2xl font-semibold text-[var(--color-tx-azul)]"><?php echo esc_html($display_name); ?></h1>
-    <p class="text-[var(--color-tx-cafe)] text-sm capitalize"><?php echo esc_html($gender ?: 'Modelo'); ?></p>
-
-    <?php if (!empty($department)): ?>
-      <p class="text-[13px] text-[var(--color-tx-negro)] mt-1">Departamento: <?php echo esc_html($department); ?></p>
-    <?php endif; ?>
-
-    <!-- Botón seguir -->
-    <button id="followBtn"
-            data-model-id="<?php echo esc_attr($model_id); ?>"
-            class="mt-3 bg-[var(--color-rojo-pr)] hover:bg-[#ff5858] transition text-white font-semibold px-6 py-2 rounded-full shadow-sm">
-      + Seguir
-    </button>
-
-    <!-- Estadísticas -->
-    <div class="flex justify-center gap-10 sm:gap-20 mt-8 border-t border-[var(--color-borde)] pt-6 pb-8 w-full max-w-2xl">
-      <div class="text-center">
-        <p id="followersCount" class="text-xl font-bold text-[var(--color-tx-negro)]"><?php echo $followers; ?></p>
-        <p class="text-xs text-[var(--color-tx-cafe)] uppercase tracking-wide">Seguidores</p>
+      <!-- 📊 Stats centradas en la imagen (con bordes sutiles) -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center gap-12 sm:gap-20 text-center text-white">
+        <div class="px-4 border-y border-[var(--color-borde)] py-2">
+          <p class="text-[22px] font-semibold leading-none"><?php echo $followers ?: 487; ?></p>
+          <p class="uppercase text-[11px] tracking-wider text-gray-300 mt-1">Seguidores</p>
+        </div>
+        <div class="px-4 border-y border-[var(--color-borde)] py-2">
+          <p class="text-[22px] font-semibold leading-none"><?php echo $total_likes ?: 455; ?></p>
+          <p class="uppercase text-[11px] tracking-wider text-gray-300 mt-1">Likes</p>
+        </div>
+        <div class="px-4 border-y border-[var(--color-borde)] py-2">
+          <p class="text-[22px] font-semibold leading-none"><?php echo $total_views ?: 15; ?></p>
+          <p class="uppercase text-[11px] tracking-wider text-gray-300 mt-1">Vistas</p>
+        </div>
       </div>
-      <div class="text-center">
-        <p id="likesCount" class="text-xl font-bold text-[var(--color-tx-negro)]"><?php echo $total_likes; ?></p>
-        <p class="text-xs text-[var(--color-tx-cafe)] uppercase tracking-wide">Likes</p>
-      </div>
-      <div class="text-center">
-        <p id="viewsCount" class="text-xl font-bold text-[var(--color-tx-negro)]"><?php echo $total_views; ?></p>
-        <p class="text-xs text-[var(--color-tx-cafe)] uppercase tracking-wide">Vistas</p>
+
+
+      <!-- 🧍 Info del modelo alineada a la izquierda -->
+      <div class="absolute bottom-[-70px] left-0 flex items-start gap-5 px-6">
+        <img src="<?php echo esc_url($profile_photo); ?>"
+             alt="<?php echo esc_attr($display_name); ?>"
+             class="w-[150px] h-[150px] rounded-full border-4 border-[var(--color-blanco-pr)] shadow-lg object-cover mr-2">
+
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 text-left translate-y-26">
+          <div>
+            <h1 class="text-2xl font-semibold text-[var(--color-tx-azul)] leading-tight">
+              <?php echo esc_html($display_name); ?>
+            </h1>
+            <p class="text-[15px] text-[var(--color-tx-cafe)] mt-0.5">
+              Modelo
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
+<!-- 🔘 Barra de acciones (debajo de la portada) -->
+<section class="max-w-[1200px] mx-auto flex items-end justify-end gap-3 px-6 mt-6 mb-4">
+  <!-- Botón Lista de deseos -->
+  <button id="wishlistBtn"
+          class=" text-[var(--color-tx-negro)] border-1 border-[var(--color-borde)] px-6 py-2 rounded-[4px] font-semibold">
+    💛 Mi lista de deseos
+  </button>
+  <!-- Botón Seguir -->
+  <button id="followBtn"
+          data-model-id="<?php echo esc_attr($model_id); ?>"
+          class="bg-[var(--color-azul-pr)] text-[var(--color-blanco-pr)] px-6 py-2 rounded-[4px] font-semibold shadow-sm transition">
+    + Seguir
+  </button>
+</section>
+
+  <div class="h-50"></div>
 
   <!-- GALERÍA -->
   <section class="max-w-6xl mx-auto px-6 pb-12">
