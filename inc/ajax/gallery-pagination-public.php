@@ -46,12 +46,15 @@ function gs_get_modelo_fotos_public() {
             <div class="relative group overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300">
                 <div class="aspect-square w-full h-auto relative overflow-hidden rounded-2xl bg-gray-100 animate-pulse">
                     <img 
-                        loading="lazy"
-                        src="<?php echo esc_url(gs_get_model_image($foto->ID, 'modelo_panel')); ?>" 
-                        alt=""
-                        class="w-full h-auto object-cover rounded-2xl opacity-0 transition-opacity duration-500 ease-out"
-                        onload="this.classList.remove('opacity-0','animate-pulse'); this.parentElement.classList.remove('animate-pulse','bg-gray-100');"
+                    loading="lazy"
+                    src="<?php echo esc_url(gs_get_model_image($foto->ID, 'modelo_panel')); ?>" 
+                    data-full="<?php echo esc_url(gs_get_model_image($foto->ID, 'full', true)); ?>"
+                    alt=""
+                    class="w-full h-auto object-cover rounded-2xl opacity-0 transition-opacity duration-500 ease-out"
+                    onload="this.classList.remove('opacity-0','animate-pulse'); this.parentElement.classList.remove('animate-pulse','bg-gray-100');"
                     />
+
+
                     <div class="absolute bottom-3 right-3 bg-black/40 px-2 py-1 rounded text-white text-xs flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[var(--color-rojo-pr)]" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 

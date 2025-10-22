@@ -25,6 +25,7 @@ add_action('wp_body_open', function () {
             <?php get_template_part('template-parts/modals/puntos-recompensa-info'); ?>
             <?php get_template_part('template-parts/modals/subida-foto-info'); ?>
             <?php get_template_part('template-parts/modals/confirmar-eliminar-foto'); ?>
+            <?php get_template_part('template-parts/modals/foto-grande'); ?>
         </div>
     </div>
     <?php

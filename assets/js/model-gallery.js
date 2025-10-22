@@ -9,43 +9,41 @@ document.addEventListener("DOMContentLoaded", () => {
   /******************************************************
    * 🔹 FUNCIÓN GLOBAL: Cargar fotos por página
    ******************************************************/
-window.cargarFotos = function (page = 1) {
-  const formData = new FormData();
-  formData.append("action", "get_modelo_fotos");
-  formData.append("page", page);
-  formData.append("nonce", gs_private_gallery.nonce); // ✅ seguridad
+  window.cargarFotos = function (page = 1) {
+    const formData = new FormData();
+    formData.append("action", "get_modelo_fotos");
+    formData.append("page", page);
+    formData.append("nonce", gs_private_gallery.nonce); // ✅ seguridad
 
-  const loader = document.getElementById("galeria-loader");
-  if (loader) loader.classList.remove("hidden");
+    const loader = document.getElementById("galeria-loader");
+    if (loader) loader.classList.remove("hidden");
 
-  fetch(gs_private_gallery.ajaxurl, { // ✅ usamos el objeto localizado, no ajaxurl global
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
+    fetch(gs_private_gallery.ajaxurl, {
+      method: "POST",
+      body: formData,
     })
-    .then((data) => {
-      if (loader) loader.classList.add("hidden");
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (loader) loader.classList.add("hidden");
 
-      if (!data.success) {
-        console.error("❌ Error desde servidor:", data.data?.message || "Respuesta inválida");
-        throw new Error("Error al cargar fotos.");
-      }
+        if (!data.success) {
+          console.error("❌ Error desde servidor:", data.data?.message || "Respuesta inválida");
+          throw new Error("Error al cargar fotos.");
+        }
 
-      // ✅ Actualizar galería y paginación
-      gallery.innerHTML = data.data.html;
-      gallery.dataset.current = data.data.current_page;
-
-      generarPaginacion(data.data.total_pages, data.data.current_page);
-    })
-    .catch((err) => {
-      if (loader) loader.classList.add("hidden");
-      console.error("❌ Error al cargar fotos:", err);
-    });
-};
-
+        // ✅ Actualizar galería y paginación
+        gallery.innerHTML = data.data.html;
+        gallery.dataset.current = data.data.current_page;
+        generarPaginacion(data.data.total_pages, data.data.current_page);
+      })
+      .catch((err) => {
+        if (loader) loader.classList.add("hidden");
+        console.error("❌ Error al cargar fotos:", err);
+      });
+  };
 
   /******************************************************
    * 🔹 Generar botones de paginación
@@ -66,13 +64,8 @@ window.cargarFotos = function (page = 1) {
       return btn;
     };
 
-    // ← Prev
     if (activePage > 1) paginacion.appendChild(createBtn(activePage - 1, "←"));
-
-    // Numbers
     for (let i = 1; i <= totalPages; i++) paginacion.appendChild(createBtn(i));
-
-    // → Next
     if (activePage < totalPages) paginacion.appendChild(createBtn(activePage + 1, "→"));
   }
 
@@ -96,7 +89,6 @@ window.cargarFotos = function (page = 1) {
       const file = e.target.files[0];
       if (!file) return;
 
-      // Modal global
       const modal = document.getElementById("gs-info-modal");
       const overlay = document.getElementById("gs-info-overlay");
       const inner = document.getElementById("gs-info-inner");
@@ -130,7 +122,7 @@ window.cargarFotos = function (page = 1) {
 
       try {
         console.log("🚀 Subiendo imagen al servidor...");
-        const response = await fetch(ajaxurl, { method: "POST", body: formData });
+        const response = await fetch(gs_private_gallery.ajaxurl, { method: "POST", body: formData });
         const data = await response.json();
 
         console.log("📩 Respuesta recibida:", data);
@@ -146,7 +138,8 @@ window.cargarFotos = function (page = 1) {
           const puntosData = new FormData();
           puntosData.append("action", "sumar_puntos_modelo");
           puntosData.append("puntos", "5");
-          await fetch(ajaxurl, { method: "POST", body: puntosData });
+
+          await fetch(gs_private_gallery.ajaxurl, { method: "POST", body: puntosData });
         } else {
           alert("⚠️ " + (data.data?.message || "Error desconocido."));
         }
@@ -197,98 +190,86 @@ window.cargarFotos = function (page = 1) {
     }
   });
 
-/******************************************************
- * 🗑️ ELIMINAR FOTO (con modal y penalización)
- ******************************************************/
-document.addEventListener("click", async (e) => {
-  const btn = e.target.closest(".delete-foto");
-  if (!btn) return;
+  /******************************************************
+   * 🗑️ ELIMINAR FOTO (con modal y penalización)
+   ******************************************************/
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".delete-foto");
+    if (!btn) return;
 
-  // Guardamos el ID de la foto seleccionada
-  const fotoId = btn.dataset.id;
-  if (!fotoId) return;
-  window.fotoAEliminar = fotoId;
+    const fotoId = btn.dataset.id;
+    if (!fotoId) return;
+    window.fotoAEliminar = fotoId;
 
-  // Mostrar modal de confirmación
-  const overlay = document.getElementById("gs-info-overlay");
-  const modal = document.getElementById("gs-info-modal");
-  const inner = document.getElementById("gs-info-inner");
-  const target = document.getElementById("gs-info-eliminar-foto");
+    const overlay = document.getElementById("gs-info-overlay");
+    const modal = document.getElementById("gs-info-modal");
+    const inner = document.getElementById("gs-info-inner");
+    const target = document.getElementById("gs-info-eliminar-foto");
 
-  if (overlay && modal && inner && target) {
-    overlay.classList.remove("hidden");
-    modal.classList.remove("hidden");
-    document.body.classList.add("overflow-hidden");
+    if (overlay && modal && inner && target) {
+      overlay.classList.remove("hidden");
+      modal.classList.remove("hidden");
+      document.body.classList.add("overflow-hidden");
 
-    // Reiniciar animación "wiggle"
-    target.classList.remove("animate-[wiggle_0.3s_ease-in-out]");
-    void target.offsetWidth; // ⚡ Forzar reflow
-    target.classList.add("animate-[wiggle_0.3s_ease-in-out]");
+      // Animación wiggle
+      target.classList.remove("animate-[wiggle_0.3s_ease-in-out]");
+      void target.offsetWidth;
+      target.classList.add("animate-[wiggle_0.3s_ease-in-out]");
 
-    requestAnimationFrame(() => {
-      overlay.classList.add("opacity-100");
-      inner.classList.remove("opacity-0", "scale-95");
-      inner.classList.add("opacity-100", "scale-100");
-      target.classList.remove("hidden", "opacity-0");
-    });
-  }
-});
+      requestAnimationFrame(() => {
+        overlay.classList.add("opacity-100");
+        inner.classList.remove("opacity-0", "scale-95");
+        inner.classList.add("opacity-100", "scale-100");
+        target.classList.remove("hidden", "opacity-0");
+      });
+    }
+  });
 
-// Confirmar eliminación
-document.getElementById("gs-confirmar-eliminar")?.addEventListener("click", async () => {
-  const fotoId = window.fotoAEliminar;
-  if (!fotoId) return;
+  // Confirmar eliminación
+  document.getElementById("gs-confirmar-eliminar")?.addEventListener("click", async () => {
+    const fotoId = window.fotoAEliminar;
+    if (!fotoId) return;
 
-  // Cerrar modal
-  document.querySelectorAll("[data-close-info]").forEach((btn) => btn.click());
+    document.querySelectorAll("[data-close-info]").forEach((btn) => btn.click());
 
-  // 🔸 Eliminar foto
-  const formData = new FormData();
-  formData.append("action", "eliminar_foto_modelo");
-  formData.append("foto_id", fotoId);
+    // 🔸 Eliminar foto
+    const formData = new FormData();
+    formData.append("action", "eliminar_foto_modelo");
+    formData.append("foto_id", fotoId);
 
-  try {
-    const response = await fetch(ajaxurl, { method: "POST", body: formData });
-    const data = await response.json();
+    try {
+      const response = await fetch(gs_private_gallery.ajaxurl, { method: "POST", body: formData });
+      const data = await response.json();
 
-    if (data.success) {
-      // 🔄 Animación de salida visual
-      const fotoDiv = document.querySelector(`.delete-foto[data-id="${fotoId}"]`)?.closest(".group");
-      if (fotoDiv) {
-        fotoDiv.style.transition = "opacity 0.3s ease, transform 0.3s ease";
-        fotoDiv.style.opacity = "0";
-        fotoDiv.style.transform = "scale(0.95)";
-        setTimeout(async () => {
-          fotoDiv.remove();
+      if (data.success) {
+        const fotoDiv = document.querySelector(`.delete-foto[data-id="${fotoId}"]`)?.closest(".group");
+        if (fotoDiv) {
+          fotoDiv.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+          fotoDiv.style.opacity = "0";
+          fotoDiv.style.transform = "scale(0.95)";
+          setTimeout(async () => {
+            fotoDiv.remove();
 
-          // ⚙️ Después de eliminar, intentamos completar el hueco
-          const gallery = document.getElementById("galeria-fotos");
-          if (gallery) {
+            // Rellenar hueco
             const totalActual = gallery.querySelectorAll(".group").length;
-            const offset = totalActual; // pedimos la siguiente según cantidad actual
+            const offset = totalActual;
             const formNext = new FormData();
             formNext.append("action", "get_next_model_photo");
             formNext.append("offset", offset);
 
             try {
-              const resNext = await fetch(ajaxurl, { method: "POST", body: formNext });
+              const resNext = await fetch(gs_private_gallery.ajaxurl, { method: "POST", body: formNext });
               const nextData = await resNext.json();
 
               if (nextData.success && nextData.data.html) {
-                // Crear contenedor temporal
                 const temp = document.createElement("div");
                 temp.innerHTML = nextData.data.html.trim();
                 const newPhoto = temp.firstElementChild;
 
-                // 🔹 Agregar animación de aparición suave
                 newPhoto.style.opacity = "0";
                 newPhoto.style.transform = "scale(0.92)";
                 newPhoto.style.transition = "opacity 0.4s ease, transform 0.4s ease";
-
-                // Insertar al final de la galería
                 gallery.insertAdjacentElement("beforeend", newPhoto);
-
-                // Activar animación
                 requestAnimationFrame(() => {
                   newPhoto.style.opacity = "1";
                   newPhoto.style.transform = "scale(1)";
@@ -299,32 +280,31 @@ document.getElementById("gs-confirmar-eliminar")?.addEventListener("click", asyn
             } catch (err) {
               console.error("❌ Error al intentar rellenar galería:", err);
             }
-          }
-        }, 300);
-      }
-
-      // ⚖️ Penalizar puntos
-      const puntosData = new FormData();
-      puntosData.append("action", "restar_puntos_por_eliminar_foto");
-      const res = await fetch(ajaxurl, { method: "POST", body: puntosData });
-      const puntosResp = await res.json();
-
-      if (puntosResp.success) {
-        if (typeof gsToast === "function") {
-          gsToast("⚠️ Has perdido 20 puntos por eliminar una foto.", "warning");
-        } else {
-          alert("⚠️ Has perdido 20 puntos por eliminar una foto.");
+          }, 300);
         }
-      }
-    } else {
-      alert("⚠️ " + (data.data?.message || "Error al eliminar la foto"));
-    }
-  } catch (err) {
-    console.error("❌ Error al eliminar:", err);
-    alert("Error al eliminar la foto.");
-  }
-});
 
+        // ⚖️ Penalizar puntos
+        const puntosData = new FormData();
+        puntosData.append("action", "restar_puntos_por_eliminar_foto");
+
+        const res = await fetch(gs_private_gallery.ajaxurl, { method: "POST", body: puntosData });
+        const puntosResp = await res.json();
+
+        if (puntosResp.success) {
+          if (typeof gsToast === "function") {
+            gsToast("⚠️ Has perdido 20 puntos por eliminar una foto.", "warning");
+          } else {
+            alert("⚠️ Has perdido 20 puntos por eliminar una foto.");
+          }
+        }
+      } else {
+        alert("⚠️ " + (data.data?.message || "Error al eliminar la foto"));
+      }
+    } catch (err) {
+      console.error("❌ Error al eliminar:", err);
+      alert("Error al eliminar la foto.");
+    }
+  });
 
   /******************************************************
    * 🚀 Inicializar galería al cargar

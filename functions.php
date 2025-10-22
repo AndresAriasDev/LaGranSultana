@@ -61,6 +61,7 @@ require_once get_template_directory() . '/inc/ajax/model-views.php';
 require_once get_template_directory() . '/inc/ajax/gallery-pagination.php';
 require_once get_template_directory() . '/inc/ajax/gallery-pagination-public.php';
 require_once get_template_directory() . '/inc/modals/info-modal.php';
+require_once get_template_directory() . '/inc/modals/media-modal.php';
 require_once get_template_directory() . '/inc/shortcodes/register.php';
 require_once get_template_directory() . '/inc/shortcodes/login.php';
 require_once get_template_directory() . '/inc/auth/login-handler.php';
@@ -219,6 +220,18 @@ add_action('wp_enqueue_scripts', function() {
     }
 });
 
+add_action('wp_enqueue_scripts', function() {
+  if (is_singular('modelo')) {
+    wp_enqueue_script(
+      'gs-media-modals',
+      get_template_directory_uri() . '/assets/js/gs-media-modals.js',
+      [],
+      '1.0',
+      true
+    );
+  }
+});
+
 
 
 /******************************************************
@@ -261,22 +274,24 @@ add_filter('jpeg_quality', function ($quality, $context) {
     return $quality;
 }, 10, 2);
 
-
 /******************************************************
- * 🧰 FUNCIÓN AUXILIAR (opcional)
- * Permite obtener una URL de imagen segura en el tamaño deseado.
- * Si no existe la versión optimizada, devuelve la original.
+ * 🧰 FUNCIÓN AUXILIAR MEJORADA
+ * Permite obtener una URL de imagen en tamaño específico,
+ * o forzar el tamaño "full" (original sin compresión).
  ******************************************************/
 if (!function_exists('gs_get_model_image')) {
-    function gs_get_model_image($post_id, $size = 'modelo_panel') {
-        $url = get_the_post_thumbnail_url($post_id, $size);
+    function gs_get_model_image($post_id, $size = 'modelo_panel', $force_full = false) {
+        // Si se fuerza el tamaño "full", se usa directamente el original
+        $url = get_the_post_thumbnail_url($post_id, $force_full ? 'full' : $size);
+
+        // Si por alguna razón no hay thumbnail o tamaño generado
         if (!$url) {
             $url = get_the_post_thumbnail_url($post_id, 'full');
         }
+
         return esc_url($url);
     }
 }
-
 
 /**
  * Encolar JS del perfil público del modelo
