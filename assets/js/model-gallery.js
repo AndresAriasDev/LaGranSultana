@@ -9,35 +9,43 @@ document.addEventListener("DOMContentLoaded", () => {
   /******************************************************
    * 🔹 FUNCIÓN GLOBAL: Cargar fotos por página
    ******************************************************/
-  window.cargarFotos = function (page = 1) {
-    const formData = new FormData();
-    formData.append("action", "get_modelo_fotos");
-    formData.append("page", page);
+window.cargarFotos = function (page = 1) {
+  const formData = new FormData();
+  formData.append("action", "get_modelo_fotos");
+  formData.append("page", page);
+  formData.append("nonce", gs_private_gallery.nonce); // ✅ seguridad
 
-    const loader = document.getElementById("galeria-loader");
-    if (loader) loader.classList.remove("hidden");
+  const loader = document.getElementById("galeria-loader");
+  if (loader) loader.classList.remove("hidden");
 
-    fetch(ajaxurl, {
-      method: "POST",
-      body: formData,
+  fetch(gs_private_gallery.ajaxurl, { // ✅ usamos el objeto localizado, no ajaxurl global
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
     })
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.success) throw new Error("Error al cargar fotos.");
+    .then((data) => {
+      if (loader) loader.classList.add("hidden");
 
-        gallery.innerHTML = data.data.html;
-        gallery.dataset.current = data.data.current_page;
+      if (!data.success) {
+        console.error("❌ Error desde servidor:", data.data?.message || "Respuesta inválida");
+        throw new Error("Error al cargar fotos.");
+      }
 
-        // Ocultar loader
-        if (loader) loader.classList.add("hidden");
+      // ✅ Actualizar galería y paginación
+      gallery.innerHTML = data.data.html;
+      gallery.dataset.current = data.data.current_page;
 
-        // Generar paginación
-        generarPaginacion(data.data.total_pages, data.data.current_page);
-      })
-      .catch((err) => {
-        console.error("❌ Error al cargar fotos:", err);
-      });
-  };
+      generarPaginacion(data.data.total_pages, data.data.current_page);
+    })
+    .catch((err) => {
+      if (loader) loader.classList.add("hidden");
+      console.error("❌ Error al cargar fotos:", err);
+    });
+};
+
 
   /******************************************************
    * 🔹 Generar botones de paginación

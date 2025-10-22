@@ -49,10 +49,7 @@ jQuery(document).ready(function ($) {
   // 🔹 3. REGISTRAR VISTA (cada 30s)
   // ==============================
   function registerView() {
-    $.post(ajaxurl, {
-      action: "model_register_view",
-      model_id: modelId,
-    });
+    $.post(gs_public_profile.ajaxurl, { action: "model_register_view", model_id: modelId });
   }
 
   // 1ra vista inmediata + cada 30s
@@ -65,7 +62,7 @@ jQuery(document).ready(function ($) {
   $("#followBtn").on("click", function () {
     const $btn = $(this);
 
-    $.post(ajaxurl, {
+    $.post(gs_public_profile.ajaxurl, {
       action: "model_toggle_follow",
       model_id: modelId,
     }, function (res) {
@@ -138,7 +135,7 @@ jQuery(document).ready(function ($) {
     const photoId = $("#modelGallery div").eq(currentPhotoIndex).data("photo-id");
 
     // Si no logueado, abrir modal
-    $.post(ajaxurl, { action: "model_check_login" }, function (res) {
+    $.post(gs_public_profile.ajaxurl, { action: "model_check_login" }, function (res) {
       if (!res.logged_in) {
         showLoginModal();
         return;
@@ -160,7 +157,7 @@ jQuery(document).ready(function ($) {
       }
 
       // Enviar like via AJAX
-      $.post(ajaxurl, {
+      $.post(gs_public_profile.ajaxurl, {
         action: "model_like_photo",
         photo_id: photoId,
       }, function (res) {
@@ -190,7 +187,7 @@ jQuery(document).ready(function ($) {
   $("#loadMoreBtn").on("click", function () {
     const page = $(this).data("page") || 1;
 
-    $.post(ajaxurl, {
+    $.post(gs_public_profile.ajaxurl, {
       action: "model_load_gallery",
       model_id: modelId,
       page: page + 1,

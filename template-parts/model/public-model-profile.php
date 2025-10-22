@@ -112,31 +112,25 @@ $total_views = (int) get_post_meta($model_id, 'model_total_views', true);
   </button>
 </section>
 
-  <div class="h-50"></div>
+  <div class="h-10"></div>
 
-  <!-- GALERÍA -->
-  <section class="max-w-6xl mx-auto px-6 pb-12">
-    <div id="modelGallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-      <?php for ($i = 1; $i <= 20; $i++) : ?>
-        <div class="relative group overflow-hidden rounded-lg cursor-pointer shadow-sm border border-[var(--color-borde)]" data-photo-id="<?php echo $i; ?>">
-          <img src="<?php echo get_template_directory_uri(); ?>/assets/img/placeholder-<?php echo ($i % 5) + 1; ?>.jpg" 
-               alt="Foto <?php echo $i; ?>" 
-               class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300 ease-out">
-          <div class="absolute bottom-2 right-2 bg-black/40 px-2 py-1 rounded text-white text-xs flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[var(--color-rojo-pr)]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-            <span class="font-medium">856</span>
-          </div>
-        </div>
-      <?php endfor; ?>
+<!-- 🖼️ GALERÍA PÚBLICA -->
+<section id="public-gallery-section" class="max-w-[1200px] mx-auto px-6 pb-16 mt-10">
+    <div id="public-gallery"
+        data-model-id="<?php echo esc_attr($author_id); ?>"
+        data-current="1"
+        class="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 gap-4 sm:gap-5">
     </div>
 
-    <div class="flex justify-center mt-10">
-      <button id="loadMoreBtn"
-              class="px-5 py-2 bg-[var(--color-azul-pr)] text-white rounded hover:bg-[#6f84b3] transition">
-        Cargar más
-      </button>
-    </div>
-  </section>
+  <!-- 🔹 Paginación -->
+  <div id="public-gallery-pagination" class="flex justify-center mt-8 space-x-2"></div>
+
+  <!-- Loader -->
+  <div id="public-gallery-loader" class="hidden text-center mt-10">
+    <p class="text-gray-500 text-sm">Cargando fotos...</p>
+  </div>
+</section>
+
 
 </main>
 

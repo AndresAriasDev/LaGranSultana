@@ -58,9 +58,8 @@ require_once get_template_directory() . '/inc/ajax/delete-foto.php';
 require_once get_template_directory() . '/inc/ajax/model-follow.php';
 require_once get_template_directory() . '/inc/ajax/model-like.php';
 require_once get_template_directory() . '/inc/ajax/model-views.php';
-require_once get_template_directory() . '/inc/ajax/model-gallery-pagination.php';
-
 require_once get_template_directory() . '/inc/ajax/gallery-pagination.php';
+require_once get_template_directory() . '/inc/ajax/gallery-pagination-public.php';
 require_once get_template_directory() . '/inc/modals/info-modal.php';
 require_once get_template_directory() . '/inc/shortcodes/register.php';
 require_once get_template_directory() . '/inc/shortcodes/login.php';
@@ -193,8 +192,34 @@ function gs_enqueue_model_gallery_script() {
         true
     );
 
-    wp_localize_script('model-gallery', 'ajaxurl', admin_url('admin-ajax.php'));
+    // ✅ Cambiar el nombre de la variable localizada para evitar conflicto
+    wp_localize_script('model-gallery', 'gs_private_gallery', [
+        'ajaxurl' => admin_url('admin-ajax.php'),
+        'nonce'   => wp_create_nonce('gs_private_gallery_nonce'),
+    ]);
 }
+add_action('wp_enqueue_scripts', 'gs_enqueue_model_gallery_script');
+
+
+add_action('wp_enqueue_scripts', function() {
+    if (is_singular('modelo')) { 
+        wp_enqueue_script(
+            'gs-public-model-gallery',
+            get_template_directory_uri() . '/assets/js/public-model-gallery.js',
+            ['jquery'],
+            '1.0',
+            true
+        );
+
+        // ✅ Localizamos el objeto correcto (no ajaxurl suelto)
+        wp_localize_script('gs-public-model-gallery', 'gs_public_gallery', [
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce'   => wp_create_nonce('gs_public_gallery_nonce')
+        ]);
+    }
+});
+
+
 
 /******************************************************
  * 📸 SISTEMA DE TAMAÑOS DE IMAGEN - LA GRAN SULTANA
@@ -258,7 +283,7 @@ if (!function_exists('gs_get_model_image')) {
  */
 function lgs_enqueue_public_model_scripts() {
     if (is_page_template('template-parts/model/public-model-profile.php') || is_singular('modelo')) {
-        // Encolar el JS
+
         wp_enqueue_script(
             'public-model-profile',
             get_template_directory_uri() . '/assets/js/public-model-profile.js',
@@ -267,11 +292,14 @@ function lgs_enqueue_public_model_scripts() {
             true
         );
 
-        // Enviar variables PHP al JS
-        wp_localize_script('public-model-profile', 'ajaxurl', admin_url('admin-ajax.php'));
+        wp_localize_script('public-model-profile', 'gs_public_profile', [
+        'ajaxurl' => admin_url('admin-ajax.php'),
+        'nonce'   => wp_create_nonce('gs_public_profile_nonce'),
+        ]);
     }
 }
 add_action('wp_enqueue_scripts', 'lgs_enqueue_public_model_scripts');
+
 
 /////////////////////////////
 
