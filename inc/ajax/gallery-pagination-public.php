@@ -42,30 +42,39 @@ function gs_get_modelo_fotos_public() {
     ob_start();
 
     if ($fotos && count($fotos) > 0): ?>
-        <?php foreach ($fotos as $foto): ?>
+        <?php foreach ($fotos as $foto): 
+            $foto_id   = $foto->ID;
+            $autor_id  = (int) get_post_field('post_author', $foto_id);
+            $likes     = (int) get_post_meta($foto_id, 'likes', true);
+            if ($likes < 0) $likes = 0;
+        ?>
             <div class="relative group overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300">
                 <div class="aspect-square w-full h-auto relative overflow-hidden rounded-2xl bg-gray-100 animate-pulse">
                     <img 
                     loading="lazy"
                     src="<?php echo esc_url(gs_get_model_image($foto->ID, 'modelo_panel')); ?>" 
                     data-full="<?php echo esc_url(gs_get_model_image($foto->ID, 'full', true)); ?>"
+                    data-id="<?php echo esc_attr($foto->ID); ?>"
+                    data-autor="<?php echo esc_attr(get_post_field('post_author', $foto->ID)); ?>"
+                    data-likes="<?php echo esc_attr(get_post_meta($foto->ID, 'likes', true) ?: 0); ?>"
                     alt=""
                     class="w-full h-auto object-cover rounded-2xl opacity-0 transition-opacity duration-500 ease-out"
                     onload="this.classList.remove('opacity-0','animate-pulse'); this.parentElement.classList.remove('animate-pulse','bg-gray-100');"
                     />
 
 
+                    <!-- ❤️ Contador de likes -->
                     <div class="absolute bottom-3 right-3 bg-black/40 px-2 py-1 rounded text-white text-xs flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[var(--color-rojo-pr)]" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
-                            2 5.42 4.42 3 7.5 3
-                            c1.74 0 3.41.81 4.5 2.09
-                            C13.09 3.81 14.76 3 16.5 3
-                            19.58 3 22 5.42 22 8.5
-                            c0 3.78-3.4 6.86-8.55 11.54
-                            L12 21.35z"/>
+                                2 5.42 4.42 3 7.5 3
+                                c1.74 0 3.41.81 4.5 2.09
+                                C13.09 3.81 14.76 3 16.5 3
+                                19.58 3 22 5.42 22 8.5
+                                c0 3.78-3.4 6.86-8.55 11.54
+                                L12 21.35z"/>
                         </svg>
-                        <span><?php echo rand(10, 300); ?></span>
+                        <span><?php echo esc_html($likes); ?></span>
                     </div>
                 </div>
             </div>

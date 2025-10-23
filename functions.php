@@ -202,7 +202,7 @@ function gs_enqueue_model_gallery_script() {
 add_action('wp_enqueue_scripts', 'gs_enqueue_model_gallery_script');
 
 
-add_action('wp_enqueue_scripts', function() {
+add_action('wp_enqueue_scripts', function() { 
     if (is_singular('modelo')) { 
         wp_enqueue_script(
             'gs-public-model-gallery',
@@ -212,23 +212,38 @@ add_action('wp_enqueue_scripts', function() {
             true
         );
 
-        // ✅ Localizamos el objeto correcto (no ajaxurl suelto)
+        // ✅ Variables AJAX para galería pública
         wp_localize_script('gs-public-model-gallery', 'gs_public_gallery', [
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce'   => wp_create_nonce('gs_public_gallery_nonce')
         ]);
+
+        // 💖 Variables para sistema de likes
+        wp_localize_script('gs-public-model-gallery', 'gs_likes', [
+            'ajaxurl'     => admin_url('admin-ajax.php'),
+            'nonce'       => wp_create_nonce('gs_likes_nonce'),
+            'currentUser' => get_current_user_id(),
+        ]);
     }
 });
 
+
+// 💖 Sistema de Likes (público)
 add_action('wp_enqueue_scripts', function() {
   if (is_singular('modelo')) {
     wp_enqueue_script(
       'gs-media-modals',
       get_template_directory_uri() . '/assets/js/gs-media-modals.js',
-      [],
-      '1.0',
+      ['jquery'],
+      '1.0.6',
       true
     );
+
+    wp_localize_script('gs-media-modals', 'gs_likes', [
+      'ajaxurl'      => admin_url('admin-ajax.php'),
+      'nonce'        => wp_create_nonce('gs_likes_nonce'),
+      'currentUser'  => get_current_user_id()
+    ]);
   }
 });
 

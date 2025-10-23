@@ -2,46 +2,92 @@
 if (!defined('ABSPATH')) exit;
 
 /**
- * ===========================================================
- * ❤️ AJAX: Dar "like" a una foto de modelo
- * Acción: model_like_photo
- * ===========================================================
+ * 💖 AJAX: Likes infinitos + registro por usuario
  */
+add_action('wp_ajax_sumar_like_foto', 'gs_sumar_like_foto');
+add_action('wp_ajax_nopriv_sumar_like_foto', 'gs_sumar_like_foto');
 
-add_action('wp_ajax_model_like_photo', 'lgs_model_like_photo');
-add_action('wp_ajax_nopriv_model_like_photo', 'lgs_model_like_photo');
+function gs_sumar_like_foto() {
+    check_ajax_referer('gs_likes_nonce', 'nonce');
 
-function lgs_model_like_photo() {
-    $photo_id = intval($_POST['photo_id'] ?? 0);
-
-    if (!$photo_id) {
+    $foto_id = intval($_POST['foto_id'] ?? 0);
+    if (!$foto_id) {
         wp_send_json_error(['message' => 'ID de foto inválido.']);
     }
 
-    // Si el usuario no está logueado, pedir login
+    // ⚙️ Verificar login
     if (!is_user_logged_in()) {
-        wp_send_json(['require_login' => true]);
+        wp_send_json_error(['message' => 'Debes iniciar sesión para dar like.']);
+    }
+
+    $current_user_id = get_current_user_id();
+    $foto_autor_id   = (int) get_post_field('post_author', $foto_id);
+
+    // 🚫 Evitar likes del propio autor
+    if ($current_user_id === $foto_autor_id) {
+        wp_send_json_error(['message' => 'No puedes dar like a tus propias fotos.']);
+    }
+
+    // 🚫 Validar tipo de post
+    $post_type = get_post_type($foto_id);
+    if (!in_array($post_type, ['fotos', 'attachment', 'galeria_modelo', 'foto_modelo'])) {
+        wp_send_json_error(['message' => 'Este elemento no es una foto válida.']);
+    }
+
+    // =========================================================
+    // 💾 Incrementar contador global de la foto
+    // =========================================================
+    $likes_actuales = (int) get_post_meta($foto_id, 'likes', true);
+    $likes_nuevos = $likes_actuales + 1;
+    update_post_meta($foto_id, 'likes', $likes_nuevos);
+
+    // =========================================================
+    // 🧍‍♂️ Registrar likes del usuario
+    // =========================================================
+    $user_likes = get_user_meta($current_user_id, 'gs_user_photo_likes', true);
+    if (!is_array($user_likes)) $user_likes = [];
+
+    // incrementar el contador para esta foto
+    $user_likes[$foto_id] = isset($user_likes[$foto_id])
+        ? $user_likes[$foto_id] + 1
+        : 1;
+
+    update_user_meta($current_user_id, 'gs_user_photo_likes', $user_likes);
+
+    // ✅ Respuesta
+    wp_send_json_success([
+        'likes'       => $likes_nuevos,
+        'user_likes'  => $user_likes[$foto_id],
+        'message'     => 'Like agregado correctamente.'
+    ]);
+}
+
+/**
+ * 💬 AJAX: Verificar si el usuario ya dio al menos un like a una foto
+ */
+add_action('wp_ajax_check_user_like', 'gs_check_user_like');
+add_action('wp_ajax_nopriv_check_user_like', 'gs_check_user_like');
+
+function gs_check_user_like() {
+    check_ajax_referer('gs_likes_nonce', 'nonce');
+
+    $foto_id = intval($_POST['foto_id'] ?? 0);
+    if (!$foto_id) {
+        wp_send_json_error(['message' => 'ID de foto inválido.']);
+    }
+
+    if (!is_user_logged_in()) {
+        wp_send_json_success(['liked' => false]);
     }
 
     $user_id = get_current_user_id();
-
-    // 🔸 Evitar múltiples likes del mismo usuario
-    $liked_users = (array) get_post_meta($photo_id, '_liked_users', true);
-    if (in_array($user_id, $liked_users)) {
-        wp_send_json_error(['message' => 'Ya diste like a esta foto.']);
-    }
-
-    // 🔸 Incrementar contador
-    $total_likes = (int) get_post_meta($photo_id, 'total_likes', true);
-    $total_likes++;
-
-    // 🔸 Actualizar metadatos
-    $liked_users[] = $user_id;
-    update_post_meta($photo_id, '_liked_users', $liked_users);
-    update_post_meta($photo_id, 'total_likes', $total_likes);
+    $user_likes = get_user_meta($user_id, 'gs_user_photo_likes', true);
+    $liked = is_array($user_likes)
+        && isset($user_likes[$foto_id])
+        && $user_likes[$foto_id] > 0;
 
     wp_send_json_success([
-        'total_likes' => $total_likes,
-        'message'     => 'Like agregado correctamente ❤️',
+        'liked' => $liked,
+        'count' => $liked ? $user_likes[$foto_id] : 0
     ]);
 }
