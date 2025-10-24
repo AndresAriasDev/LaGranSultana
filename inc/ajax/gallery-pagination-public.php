@@ -13,13 +13,13 @@ function gs_get_modelo_fotos_public() {
 
     $model_id = intval($_POST['model_id'] ?? 0);
     $paged     = intval($_POST['page'] ?? 1);
-    $per_page  = 12; // ✅ mostrar 20 fotos (5 columnas x 4 filas)
+    $per_page  = 15;
 
     if (!$model_id) {
         wp_send_json_error(['message' => 'Modelo no especificado.']);
     }
 
-    // 🔍 Buscar fotos del modelo
+    // 🔍 Buscar fotos actuales (paginadas)
     $fotos = get_posts([
         'post_type'      => 'fotos',
         'meta_key'       => '_modelo_relacionado',
@@ -28,16 +28,18 @@ function gs_get_modelo_fotos_public() {
         'paged'          => $paged,
     ]);
 
-    $total_query = new WP_Query([
+    // 📦 Obtener TODAS las fotos (para navegación completa)
+    $todas = get_posts([
         'post_type'      => 'fotos',
         'meta_key'       => '_modelo_relacionado',
         'meta_value'     => $model_id,
         'posts_per_page' => -1,
-        'fields'         => 'ids',
+        'orderby'        => 'date',
+        'order'          => 'DESC',
     ]);
-    $total_fotos = $total_query->found_posts;
+
+    $total_fotos = count($todas);
     $total_pages = ceil($total_fotos / $per_page);
-    wp_reset_postdata();
 
     ob_start();
 
@@ -48,37 +50,50 @@ function gs_get_modelo_fotos_public() {
             $likes     = (int) get_post_meta($foto_id, 'likes', true);
             if ($likes < 0) $likes = 0;
         ?>
-            <div class="relative group overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300">
-                <div class="aspect-square w-full h-auto relative overflow-hidden rounded-2xl bg-gray-100 animate-pulse">
-                    <img 
+        <div class="relative group overflow-hidden shadow-sm rounded-[4px] hover:shadow-xl transition-all duration-300 cursor-pointer">
+            <div class="aspect-square w-full h-auto relative overflow-hidden rounded-[4px] bg-gray-100 animate-pulse">
+
+                <img 
                     loading="lazy"
                     src="<?php echo esc_url(gs_get_model_image($foto->ID, 'modelo_panel')); ?>" 
                     data-full="<?php echo esc_url(gs_get_model_image($foto->ID, 'full', true)); ?>"
-                    data-id="<?php echo esc_attr($foto->ID); ?>"
-                    data-autor="<?php echo esc_attr(get_post_field('post_author', $foto->ID)); ?>"
-                    data-likes="<?php echo esc_attr(get_post_meta($foto->ID, 'likes', true) ?: 0); ?>"
+                    data-id="<?php echo esc_attr($foto_id); ?>"
+                    data-autor="<?php echo esc_attr($autor_id); ?>"
+                    data-likes="<?php echo esc_attr($likes); ?>"
                     alt=""
-                    class="w-full h-auto object-cover rounded-2xl opacity-0 transition-opacity duration-500 ease-out"
+                    class="w-full h-auto object-cover opacity-0 transition-opacity duration-500 ease-out z-[1]"
                     onload="this.classList.remove('opacity-0','animate-pulse'); this.parentElement.classList.remove('animate-pulse','bg-gray-100');"
-                    />
+                />
 
-
-                    <!-- ❤️ Contador de likes -->
-                    <div class="absolute bottom-3 right-3 bg-black/40 px-2 py-1 rounded text-white text-xs flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[var(--color-rojo-pr)]" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
-                                2 5.42 4.42 3 7.5 3
-                                c1.74 0 3.41.81 4.5 2.09
-                                C13.09 3.81 14.76 3 16.5 3
-                                19.58 3 22 5.42 22 8.5
-                                c0 3.78-3.4 6.86-8.55 11.54
-                                L12 21.35z"/>
-                        </svg>
-                        <span><?php echo esc_html($likes); ?></span>
+                <!-- ✨ Overlay de likes -->
+                <div class="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center pointer-events-none">
+                    <div class="rounded-xl px-6 py-4 text-center transform scale-95 group-hover:scale-100 transition-transform duration-300 ease-out">
+                        <p class="text-white text-4xl font-bold leading-tight tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] select-none">
+                            <?php echo esc_html($likes); ?>
+                        </p>
+                        <p class="text-white text-sm uppercase tracking-wider mt-1 opacity-90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] select-none">
+                            Likes
+                        </p>
                     </div>
                 </div>
             </div>
+        </div>
         <?php endforeach; ?>
+
+        <!-- 🧠 JSON oculto con todas las fotos -->
+        <script id="gs-photo-list" type="application/json">
+            <?php
+            echo wp_json_encode(array_map(function($f) {
+                return [
+                    'id'     => $f->ID,
+                    'autor'  => (int) get_post_field('post_author', $f->ID),
+                    'likes'  => (int) get_post_meta($f->ID, 'likes', true),
+                    'full'   => gs_get_model_image($f->ID, 'full', true),
+                ];
+            }, $todas));
+            ?>
+        </script>
+
     <?php else: ?>
         <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
             <img src="/wp-content/uploads/2025/10/icono-camara.png" alt="Sin fotos" class="w-16 h-16 opacity-70 mb-4">

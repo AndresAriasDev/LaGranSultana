@@ -24,10 +24,10 @@ add_action('wp_body_open', function () { ?>
   id="gs-foto-likes"
   class="absolute bottom-[120px] left-1/2 -translate-x-1/2 flex items-baseline gap-1.5 text-white text-center z-[45]"
 >
-  <span
-    id="gs-foto-likes-num"
-    class="text-xl font-extrabold leading-none drop-shadow-md"
-  >0</span>
+<span
+  id="gs-foto-likes-num"
+  class="text-4xl font-black tracking-tight text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] select-none transition-transform duration-300 ease-out"
+>0</span>
 </div>
 
   <!-- ⬅️➡️ Flechas + ❤️ Corazón -->

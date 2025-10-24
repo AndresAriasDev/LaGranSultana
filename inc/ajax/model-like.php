@@ -91,3 +91,23 @@ function gs_check_user_like() {
         'count' => $liked ? $user_likes[$foto_id] : 0
     ]);
 }
+
+// =========================================================
+// 📊 Obtener likes de múltiples fotos (para actualización en vivo)
+// =========================================================
+add_action('wp_ajax_get_likes_bulk', 'gs_get_likes_bulk');
+add_action('wp_ajax_nopriv_get_likes_bulk', 'gs_get_likes_bulk');
+
+function gs_get_likes_bulk() {
+    $ids = isset($_POST['ids']) ? json_decode(stripslashes($_POST['ids']), true) : [];
+    if (empty($ids) || !is_array($ids)) {
+        wp_send_json_error(['message' => 'IDs inválidos']);
+    }
+
+    $result = [];
+    foreach ($ids as $id) {
+        $result[$id] = (int) get_post_meta($id, 'likes', true);
+    }
+
+    wp_send_json_success($result);
+}

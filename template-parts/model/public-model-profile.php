@@ -119,7 +119,7 @@ $total_views = (int) get_post_meta($model_id, 'model_total_views', true);
     <div id="public-gallery"
         data-model-id="<?php echo esc_attr($author_id); ?>"
         data-current="1"
-        class="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 gap-4 sm:gap-5">
+        class="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
     </div>
 
   <!-- 🔹 Paginación -->

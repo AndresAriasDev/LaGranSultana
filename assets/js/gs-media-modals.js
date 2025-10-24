@@ -12,69 +12,76 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================================================
   // 📸 ABRIR MODAL DESDE LA GALERÍA
   // =========================================================
-  document.addEventListener("click", (e) => {
-    const img = e.target.closest("#public-gallery img");
-    if (!img) return;
+// 📸 ABRIR MODAL DESDE LA GALERÍA
+document.addEventListener("click", (e) => {
+  const img = e.target.closest("#public-gallery img");
+  if (!img) return;
 
-    const src = img.dataset.full || img.src;
-    const likes = img.dataset.likes || "0";
-    const id = img.dataset.id || null;
-    const autor = img.dataset.autor || null;
+  // 🧠 Asegurar que la lista JSON esté cargada
+  if (!window.gsAllPhotos) {
+    const photoListEl = document.getElementById("gs-photo-list");
+    if (photoListEl) {
+      try {
+        window.gsAllPhotos = JSON.parse(photoListEl.textContent);
+      } catch (err) {
+        console.error("❌ Error al leer gs-photo-list:", err);
+        window.gsAllPhotos = [];
+      }
+    } else {
+      window.gsAllPhotos = [];
+    }
+  }
 
-    fotoImg.src = src;
-    fotoImg.dataset.id = id;
-    fotoImg.dataset.autor = autor;
-    likesNum.textContent = likes;
+  // Datos de la imagen clickeada
+  const fotoId = parseInt(img.dataset.id);
+  const fotoData = window.gsAllPhotos.findIndex((f) => parseInt(f.id) === fotoId);
+  window.currentPhotoIndex = fotoData >= 0 ? fotoData : 0;
 
-    fotoImg.onload = () => {
-      mediaModal.classList.remove("hidden");
-      requestAnimationFrame(() => mediaModal.classList.add("opacity-100"));
-      document.body.classList.add("overflow-hidden");
-      openModal();
-      actualizarEstadoCorazon(id); // siempre se define correctamente el color
-    };
+  const fotoInfo = window.gsAllPhotos[window.currentPhotoIndex] || {};
 
-    window.currentPhotoIndex = [...document.querySelectorAll("#public-gallery img")].indexOf(img);
-  });
+  fotoImg.src = fotoInfo.full || img.dataset.full || img.src;
+  fotoImg.dataset.id = fotoInfo.id || fotoId;
+  fotoImg.dataset.autor = fotoInfo.autor || img.dataset.autor;
+  likesNum.textContent = fotoInfo.likes || img.dataset.likes || "0";
 
-  // =========================================================
-  // ⬅️➡️ NAVEGACIÓN ENTRE FOTOS
-  // =========================================================
-    const changePhoto = (dir) => {
-      const imgs = document.querySelectorAll("#public-gallery img");
-      if (!imgs.length) return;
-
-      // índice circular
-      window.currentPhotoIndex = (window.currentPhotoIndex + dir + imgs.length) % imgs.length;
-
-      const newImg = imgs[window.currentPhotoIndex];
-      const src = newImg.dataset.full || newImg.src;
-      const likes = newImg.dataset.likes || "0";
-      const id = newImg.dataset.id || null;
-      const autor = newImg.dataset.autor || null;
-
-      // 💖 Reset visual inmediato antes del cambio
-      heart.setAttribute("fill", "#9ca3af"); // gris sin transición ni flash
-      likesNum.textContent = likes;
-
-      // Transición suave de imagen
-      fotoImg.classList.add("opacity-0");
-      setTimeout(() => {
-        fotoImg.src = src;
-        fotoImg.dataset.id = id;
-        fotoImg.dataset.autor = autor;
-        fotoImg.classList.remove("opacity-0");
-
-        // Esperamos un frame para asegurarnos que la nueva imagen esté visible
-        requestAnimationFrame(() => {
-          actualizarEstadoCorazon(id); // aplica el color real
-        });
-      }, 150);
-    };
+  fotoImg.onload = () => {
+    mediaModal.classList.remove("hidden");
+    requestAnimationFrame(() => mediaModal.classList.add("opacity-100"));
+    document.body.classList.add("overflow-hidden");
+    openModal();
+    actualizarEstadoCorazon(fotoImg.dataset.id);
+  };
+});
 
 
-  prevBtn?.addEventListener("click", () => changePhoto(-1));
-  nextBtn?.addEventListener("click", () => changePhoto(1));
+// =========================================================
+// ⬅️➡️ NAVEGACIÓN ENTRE FOTOS (usa lista completa)
+// =========================================================
+const changePhoto = (dir) => {
+  const photos = window.gsAllPhotos || [];
+  if (!photos.length) return;
+
+  window.currentPhotoIndex = (window.currentPhotoIndex + dir + photos.length) % photos.length;
+  const newFoto = photos[window.currentPhotoIndex];
+  if (!newFoto) return;
+
+  heart.setAttribute("fill", "#9ca3af");
+  likesNum.textContent = newFoto.likes || 0;
+
+  fotoImg.classList.add("opacity-0");
+  setTimeout(() => {
+    fotoImg.src = newFoto.full;
+    fotoImg.dataset.id = newFoto.id;
+    fotoImg.dataset.autor = newFoto.autor;
+    fotoImg.classList.remove("opacity-0");
+    requestAnimationFrame(() => actualizarEstadoCorazon(newFoto.id));
+  }, 150);
+};
+
+prevBtn?.addEventListener("click", () => changePhoto(-1));
+nextBtn?.addEventListener("click", () => changePhoto(1));
+
+
 
   // =========================================================
   // ❤️ ANIMACIÓN DE CORAZONES FLOTANTES
@@ -257,3 +264,38 @@ async function enviarLike(fotoId, autorId) {
   });
 });
 
+// =========================================================
+// 🔁 Actualización automática de contadores de likes en galería
+// =========================================================
+setInterval(async () => {
+  const fotos = document.querySelectorAll("#public-gallery img[data-id]");
+  if (!fotos.length) return;
+
+  const ids = Array.from(fotos).map(img => img.dataset.id);
+
+  const formData = new FormData();
+  formData.append("action", "get_likes_bulk");
+  formData.append("ids", JSON.stringify(ids));
+
+  try {
+    const res = await fetch(gs_likes.ajaxurl, { method: "POST", body: formData });
+    const data = await res.json();
+
+    if (data.success && data.data) {
+      Object.entries(data.data).forEach(([id, total]) => {
+        const imgContainer = document.querySelector(`#public-gallery img[data-id='${id}']`)?.parentElement;
+        if (!imgContainer) return;
+        const likeSpan = imgContainer.querySelector("span");
+        if (likeSpan && likeSpan.textContent !== String(total)) {
+          likeSpan.textContent = total;
+
+          // animación leve de rebote
+          likeSpan.style.transform = "scale(1.2)";
+          setTimeout(() => (likeSpan.style.transform = "scale(1)"), 300);
+        }
+      });
+    }
+  } catch (err) {
+    console.error("Error actualizando contadores:", err);
+  }
+}, 5000); // cada 5 segundos
