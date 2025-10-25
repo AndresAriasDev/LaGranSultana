@@ -68,8 +68,8 @@ function gs_get_modelo_fotos_public() {
                 <!-- ✨ Overlay de likes -->
                 <div class="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center pointer-events-none">
                     <div class="rounded-xl px-6 py-4 text-center transform scale-95 group-hover:scale-100 transition-transform duration-300 ease-out">
-                        <p class="text-white text-4xl font-bold leading-tight tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] select-none">
-                            <?php echo esc_html($likes); ?>
+                        <p data-like-counter class="text-white text-4xl font-bold leading-tight tracking-wide">
+                        <?php echo esc_html($likes); ?>
                         </p>
                         <p class="text-white text-sm uppercase tracking-wider mt-1 opacity-90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] select-none">
                             Likes

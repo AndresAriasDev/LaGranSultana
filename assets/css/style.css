@@ -355,23 +355,35 @@ input.border-red-400 {
   .right-4 {
     right: calc(var(--spacing) * 4);
   }
-  .right-\[14px\] {
-    right: 14px;
-  }
   .bottom-1 {
     bottom: calc(var(--spacing) * 1);
   }
   .bottom-5 {
     bottom: calc(var(--spacing) * 5);
   }
+  .bottom-6 {
+    bottom: calc(var(--spacing) * 6);
+  }
   .bottom-10 {
     bottom: calc(var(--spacing) * 10);
   }
+  .bottom-14 {
+    bottom: calc(var(--spacing) * 14);
+  }
+  .bottom-15 {
+    bottom: calc(var(--spacing) * 15);
+  }
+  .bottom-20 {
+    bottom: calc(var(--spacing) * 20);
+  }
+  .bottom-40 {
+    bottom: calc(var(--spacing) * 40);
+  }
+  .bottom-50 {
+    bottom: calc(var(--spacing) * 50);
+  }
   .bottom-\[-70px\] {
     bottom: -70px;
-  }
-  .bottom-\[12px\] {
-    bottom: 12px;
   }
   .bottom-\[120px\] {
     bottom: 120px;
@@ -399,9 +411,6 @@ input.border-red-400 {
   }
   .z-\[1\] {
     z-index: 1;
-  }
-  .z-\[10\] {
-    z-index: 10;
   }
   .z-\[20\] {
     z-index: 20;
@@ -568,8 +577,17 @@ input.border-red-400 {
   .h-\[50px\] {
     height: 50px;
   }
-  .h-\[94vh\] {
-    height: 94vh;
+  .h-\[75vh\] {
+    height: 75vh;
+  }
+  .h-\[80vh\] {
+    height: 80vh;
+  }
+  .h-\[90vh\] {
+    height: 90vh;
+  }
+  .h-\[100vh\] {
+    height: 100vh;
   }
   .h-\[150px\] {
     height: 150px;
@@ -631,6 +649,9 @@ input.border-red-400 {
   .w-\[34px\] {
     width: 34px;
   }
+  .w-\[90vw\] {
+    width: 90vw;
+  }
   .w-\[94\%\] {
     width: 94%;
   }
@@ -645,6 +666,12 @@ input.border-red-400 {
   }
   .w-full {
     width: 100%;
+  }
+  .max-w-\[450px\] {
+    max-width: 450px;
+  }
+  .max-w-\[500px\] {
+    max-width: 500px;
   }
   .max-w-\[1200px\] {
     max-width: 1200px;
@@ -881,12 +908,6 @@ input.border-red-400 {
   .rounded-2xl {
     border-radius: var(--radius-2xl);
   }
-  .rounded-\[2px\] {
-    border-radius: 2px;
-  }
-  .rounded-\[3px\] {
-    border-radius: 3px;
-  }
   .rounded-\[4px\] {
     border-radius: 4px;
   }
@@ -1081,9 +1102,6 @@ input.border-red-400 {
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
-  .object-contain {
-    object-fit: contain;
-  }
   .object-cover {
     object-fit: cover;
   }
@@ -1219,6 +1237,9 @@ input.border-red-400 {
   .align-middle {
     vertical-align: middle;
   }
+  .font-\[Inter\] {
+    font-family: Inter;
+  }
   .text-2xl {
     font-size: var(--text-2xl);
     line-height: var(--tw-leading, var(--text-2xl--line-height));
@@ -1285,6 +1306,10 @@ input.border-red-400 {
     --tw-leading: var(--leading-tight);
     line-height: var(--leading-tight);
   }
+  .font-\[600\] {
+    --tw-font-weight: 600;
+    font-weight: 600;
+  }
   .font-\[var\(--font-sans\)\] {
     --tw-font-weight: var(--font-sans);
     font-weight: var(--font-sans);
@@ -1347,6 +1372,9 @@ input.border-red-400 {
   }
   .text-\[var\(--color-tx-negro\)\] {
     color: var(--color-tx-negro);
+  }
+  .text-black {
+    color: var(--color-black);
   }
   .text-blue-600 {
     color: var(--color-blue-600);
@@ -1804,12 +1832,6 @@ input.border-red-400 {
       line-height: var(--tw-leading, var(--text-3xl--line-height));
     }
   }
-  .sm\:text-lg {
-    @media (width >= 40rem) {
-      font-size: var(--text-lg);
-      line-height: var(--tw-leading, var(--text-lg--line-height));
-    }
-  }
   .md\:col-span-1 {
     @media (width >= 48rem) {
       grid-column: span 1 / span 1;
@@ -1862,6 +1884,11 @@ input.border-red-400 {
       line-height: var(--tw-leading, var(--text-4xl--line-height));
     }
   }
+  .lg\:h-\[90vh\] {
+    @media (width >= 64rem) {
+      height: 90vh;
+    }
+  }
   .lg\:grid-cols-3 {
     @media (width >= 64rem) {
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1869,11 +1896,6 @@ input.border-red-400 {
   }
   .lg\:grid-cols-4 {
     @media (width >= 64rem) {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
-  .xl\:grid-cols-4 {
-    @media (width >= 80rem) {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
